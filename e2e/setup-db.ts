@@ -12,9 +12,11 @@ async function main() {
   const prisma = createScriptClient();
   try {
     await prisma.loginAttempt.deleteMany();
-    await prisma.timeEntry.deleteMany({
-      where: { user: { email: { in: Object.values(USERS).map((u) => u.email) } } },
-    });
+    const testUsers = { user: { email: { in: Object.values(USERS).map((u) => u.email) } } };
+    await prisma.timeEntry.deleteMany({ where: testUsers });
+    await prisma.dailyLog.deleteMany({ where: testUsers });
+    await prisma.learningEntry.deleteMany({ where: testUsers });
+    await prisma.tag.deleteMany({ where: testUsers });
     for (const u of Object.values(USERS)) {
       const data = {
         name: u.name,

@@ -4,8 +4,16 @@ import { useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 
-/** Jumps to /timeline?date=… as soon as a date is picked. */
-export function TimelineDatePicker({ value, max }: { value: string; max: string }) {
+/** Jumps to `<basePath>?date=…` as soon as a date is picked. */
+export function TimelineDatePicker({
+  value,
+  max,
+  basePath = "/timeline",
+}: {
+  value: string;
+  max: string;
+  basePath?: string;
+}) {
   const router = useRouter();
   return (
     <Input
@@ -15,7 +23,7 @@ export function TimelineDatePicker({ value, max }: { value: string; max: string 
       value={value}
       max={max}
       onChange={(e) => {
-        if (e.target.value) router.push(`/timeline?date=${e.target.value}`);
+        if (e.target.value) router.push(`${basePath}?date=${e.target.value}`);
       }}
     />
   );

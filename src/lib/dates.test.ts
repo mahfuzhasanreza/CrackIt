@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  dateKeyToDb,
   dateKeysBetween,
+  dbDateToKey,
   dayOfWeek,
   dayWindow,
   formatDuration,
@@ -134,4 +136,15 @@ describe("formatHoursCompact", () => {
     [5.5 * 3_600_000, "5.5h"],
     [7 * 3_600_000 + 12 * 60_000, "7.2h"],
   ])("%i → %s", (ms, out) => expect(formatHoursCompact(ms)).toBe(out));
+});
+
+describe("db date round trip", () => {
+  it("maps a key to UTC midnight and back", () => {
+    expect(dateKeyToDb("2026-03-01").toISOString()).toBe("2026-03-01T00:00:00.000Z");
+    expect(dbDateToKey(dateKeyToDb("2026-12-31"))).toBe("2026-12-31");
+  });
+
+  it("rejects invalid keys", () => {
+    expect(() => dateKeyToDb("2026-02-30")).toThrow();
+  });
 });
