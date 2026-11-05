@@ -151,6 +151,12 @@ UI (Server/Client Components)
   failing a previously solved problem → NEEDS_REVISION; revision "forgot" → NEEDS_REVISION.
   DB CHECK: SOLVED / NEEDS_REVISION require `solved_at`. One problem per link per user.
 
+## Lecturer rules
+
+- Publications past WRITING need `submitted_on` (DB CHECK); `lecturer/rules.ts` fills it with the
+  entered date, else the existing one, else today. Viva questions use the shared spaced-repetition
+  schedule (first practice tomorrow). Demo dates can't be in the future.
+
 ## Charts & colors
 
 - Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark

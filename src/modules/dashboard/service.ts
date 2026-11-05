@@ -10,6 +10,7 @@ import {
 } from "@/lib/dates";
 
 import { countLearningEntries } from "../journal/repository";
+import { countDueViva } from "../lecturer/repository";
 import { countDueProblems } from "../problems/repository";
 import { listTrackOptions, type TrackOption } from "../tracks-topics/repository";
 import { listEntrySpans } from "../time-tracking/repository";
@@ -61,14 +62,15 @@ export async function getDashboard(user: DashboardUser, now = new Date()): Promi
   };
 }
 
-export type RevisionDue = { notes: number; problems: number };
+export type RevisionDue = { notes: number; problems: number; viva: number };
 
-/** Learning notes and problems due for revision today (overdue included). */
+/** Learning notes, problems and viva questions due today (overdue included). */
 export async function getRevisionDue(user: DashboardUser, now = new Date()): Promise<RevisionDue> {
   const today = dateKeyToDb(logicalDateKey(now, user.timezone, user.dayStartHour));
-  const [notes, problems] = await Promise.all([
+  const [notes, problems, viva] = await Promise.all([
     countLearningEntries(user.id, { dueOnOrBefore: today }),
     countDueProblems(user.id, today),
+    countDueViva(user.id, today),
   ]);
-  return { notes, problems };
+  return { notes, problems, viva };
 }

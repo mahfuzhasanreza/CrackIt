@@ -124,6 +124,7 @@ async function DashboardContent() {
               {[
                 { label: "Learning notes", count: revision.notes, href: "/journal/learning?due=1" },
                 { label: "Problems", count: revision.problems, href: "/problems" },
+                { label: "Viva questions", count: revision.viva, href: "/lecturer?tab=viva" },
               ].map((r) => (
                 <li
                   key={r.label}

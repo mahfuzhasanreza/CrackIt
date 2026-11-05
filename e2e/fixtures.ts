@@ -16,6 +16,11 @@ export const USERS = {
     name: "Checklists User",
   },
   swe: { email: "e2e-swe@crackit.local", password: "swe-password-1234", name: "SWE User" },
+  lecturer: {
+    email: "e2e-lecturer@crackit.local",
+    password: "lecturer-password-1234",
+    name: "Lecturer User",
+  },
   journal: {
     email: "e2e-journal@crackit.local",
     password: "journal-password-1234",
