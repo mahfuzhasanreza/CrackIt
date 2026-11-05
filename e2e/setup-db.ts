@@ -20,6 +20,10 @@ async function main() {
     await prisma.checklist.deleteMany({ where: testUsers });
     await prisma.problem.deleteMany({ where: testUsers });
     await prisma.project.deleteMany({ where: testUsers });
+    await prisma.vivaQuestion.deleteMany({ where: testUsers });
+    await prisma.teachingDemo.deleteMany({ where: testUsers });
+    await prisma.publication.deleteMany({ where: testUsers });
+    await prisma.course.deleteMany({ where: testUsers });
     await prisma.tag.deleteMany({ where: testUsers });
     // Topics are re-seeded below, so edits from earlier runs are reset.
     await prisma.topic.deleteMany({ where: testUsers });
