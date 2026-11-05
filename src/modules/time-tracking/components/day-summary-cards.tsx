@@ -1,4 +1,5 @@
 import { formatDuration } from "@/lib/dates";
+import { NEUTRAL, SLEEP } from "@/lib/palette";
 
 import type { DaySummary } from "../day-summary";
 import type { TrackOption } from "../options";
@@ -16,10 +17,10 @@ export function DaySummaryCards({
   const breaks = c.BREAK ?? 0;
   const other = summary.trackedMs - study - sleep - breaks;
   const stats = [
-    { label: "Study", value: study, color: "#2563eb" },
-    { label: "Sleep", value: sleep, color: "#4f46e5" },
-    { label: "Breaks / gaps", value: breaks, color: "#9ca3af" },
-    { label: "Other", value: other, color: "#78716c" },
+    { label: "Study", value: study, color: "var(--foreground)" },
+    { label: "Sleep", value: sleep, color: SLEEP.light },
+    { label: "Breaks / gaps", value: breaks, color: NEUTRAL.light },
+    { label: "Other", value: other, color: NEUTRAL.light },
     { label: "Untracked", value: summary.untrackedMs, color: "transparent" },
   ];
   const trackRows = tracks

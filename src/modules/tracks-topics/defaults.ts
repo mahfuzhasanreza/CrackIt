@@ -18,7 +18,7 @@ export const DEFAULT_TRACKS: DefaultTrack[] = [
   {
     name: "SWE / Full-Stack",
     description: "Software engineer and full-stack developer interviews",
-    color: "#2563eb",
+    color: "#2a78d6", // palette slot 1 (blue)
     weeklyTargetMinutes: 20 * 60,
     topics: [
       {
@@ -90,7 +90,7 @@ export const DEFAULT_TRACKS: DefaultTrack[] = [
   {
     name: "University Lecturer",
     description: "Lecturer recruitment: subject depth, teaching demo, research, viva",
-    color: "#7c3aed",
+    color: "#eb6834", // palette slot 2 (orange)
     weeklyTargetMinutes: 10 * 60,
     topics: [
       {

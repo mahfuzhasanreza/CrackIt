@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  dateKeysBetween,
+  dayOfWeek,
   dayWindow,
   formatDuration,
+  formatHoursCompact,
   formatStopwatch,
   isValidDateKey,
   logicalDateKey,
@@ -10,6 +13,7 @@ import {
   shiftDateKey,
   toDateKey,
   toLocalDateTimeInput,
+  weekStartKey,
 } from "./dates";
 
 const DHAKA = "Asia/Dhaka"; // UTC+6, no DST
@@ -99,4 +103,35 @@ describe("formatting", () => {
     expect(formatStopwatch(65_000)).toBe("01:05");
     expect(formatStopwatch(3_723_000)).toBe("1:02:03");
   });
+});
+
+describe("week helpers", () => {
+  it("dayOfWeek", () => {
+    expect(dayOfWeek("2026-11-05")).toBe(4); // Thursday
+  });
+
+  it("weekStartKey defaults to Monday and supports other starts", () => {
+    expect(weekStartKey("2026-11-05")).toBe("2026-11-02");
+    expect(weekStartKey("2026-11-02")).toBe("2026-11-02");
+    expect(weekStartKey("2026-11-01")).toBe("2026-10-26"); // Sunday → previous Monday
+    expect(weekStartKey("2026-11-05", 6)).toBe("2026-10-31"); // Saturday start
+  });
+
+  it("dateKeysBetween is inclusive and crosses months", () => {
+    expect(dateKeysBetween("2026-10-30", "2026-11-02")).toEqual([
+      "2026-10-30",
+      "2026-10-31",
+      "2026-11-01",
+      "2026-11-02",
+    ]);
+  });
+});
+
+describe("formatHoursCompact", () => {
+  it.each([
+    [45 * 60_000, "45m"],
+    [2 * 3_600_000, "2h"],
+    [5.5 * 3_600_000, "5.5h"],
+    [7 * 3_600_000 + 12 * 60_000, "7.2h"],
+  ])("%i → %s", (ms, out) => expect(formatHoursCompact(ms)).toBe(out));
 });

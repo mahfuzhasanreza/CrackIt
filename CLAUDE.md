@@ -121,6 +121,14 @@ UI (Server/Client Components)
 - Day = `[dayStartHour, next dayStartHour)` in the user's timezone — use `src/lib/dates.ts`
   (`dayWindow`, `logicalDateKey`, `parseLocalDateTime`); never do tz math by hand.
 
+## Charts & colors
+
+- Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark
+  steps). Assign slots in order; never invent hues. Use `seriesVars(hex)` + the `bg-series` /
+  `border-series` utilities so dark mode uses the dark step.
+- Text never uses a series color; every chart has a legend (≥2 series), hover/focus tooltips,
+  and a table view. Run the dataviz palette validator before adding new chart colors.
+
 ## Rules
 
 - Run `pnpm check` (and `pnpm build` for routing/config changes) before saying a task is done.

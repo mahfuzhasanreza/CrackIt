@@ -124,3 +124,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Chart series colors: set --series / --series-dark inline (see src/lib/palette.ts). */
+@utility bg-series {
+  background-color: var(--series);
+  :where(.dark) & {
+    background-color: var(--series-dark, var(--series));
+  }
+}
+@utility border-series {
+  border-color: var(--series);
+  :where(.dark) & {
+    border-color: var(--series-dark, var(--series));
+  }
+}
