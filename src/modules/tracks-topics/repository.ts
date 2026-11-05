@@ -4,7 +4,13 @@ import { db } from "@/lib/db";
 
 import { buildTopicOptions, type TopicOption } from "./topic-options";
 
-export type TrackOption = { id: string; name: string; color: string; topics: TopicOption[] };
+export type TrackOption = {
+  id: string;
+  name: string;
+  color: string;
+  weeklyTargetMinutes: number | null;
+  topics: TopicOption[];
+};
 
 /** Active tracks with their topic tree flattened for pickers. */
 export async function listTrackOptions(userId: string): Promise<TrackOption[]> {
@@ -15,6 +21,7 @@ export async function listTrackOptions(userId: string): Promise<TrackOption[]> {
       id: true,
       name: true,
       color: true,
+      weeklyTargetMinutes: true,
       topics: { select: { id: true, parentId: true, name: true, sortOrder: true } },
     },
   });

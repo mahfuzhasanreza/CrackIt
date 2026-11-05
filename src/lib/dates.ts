@@ -89,3 +89,29 @@ export function formatStopwatch(ms: number): string {
   const mmss = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return h > 0 ? `${h}:${mmss}` : mmss;
 }
+
+/** Day of week of a date key: 0 = Sunday … 6 = Saturday. */
+export function dayOfWeek(key: string): number {
+  const [y, m, d] = parseDateKey(key);
+  return new Date(Date.UTC(y, m, d)).getUTCDay();
+}
+
+/** First day of the week containing `key`. Default week starts Monday (ISO). */
+export function weekStartKey(key: string, weekStartsOn = 1): string {
+  return shiftDateKey(key, -((dayOfWeek(key) - weekStartsOn + 7) % 7));
+}
+
+/** Inclusive list of date keys from `from` to `to`. */
+export function dateKeysBetween(from: string, to: string): string[] {
+  const keys: string[] = [];
+  for (let k = from; k <= to; k = shiftDateKey(k, 1)) keys.push(k);
+  return keys;
+}
+
+/** Compact duration for tight chart labels: "45m", "2h", "5.5h". */
+export function formatHoursCompact(ms: number): string {
+  const minutes = Math.max(0, Math.round(ms / 60_000));
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.round((minutes / 60) * 10) / 10;
+  return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`;
+}

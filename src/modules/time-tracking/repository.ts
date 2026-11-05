@@ -131,3 +131,23 @@ export function listActivityOptions(userId: string): Promise<ActivityOption[]> {
     select: { id: true, name: true, color: true, category: true },
   });
 }
+
+/** Lightweight rows for aggregations (stats, streaks) over long ranges. */
+export async function listEntrySpans(userId: string, start: Date, end: Date) {
+  const rows = await db.timeEntry.findMany({
+    where: {
+      userId,
+      startedAt: { lt: end },
+      OR: [{ endedAt: null }, { endedAt: { gt: start } }],
+    },
+    select: {
+      id: true,
+      startedAt: true,
+      endedAt: true,
+      trackId: true,
+      activityType: { select: { category: true, isProductive: true } },
+    },
+    orderBy: { startedAt: "asc" },
+  });
+  return rows.map(({ activityType, ...r }) => ({ ...r, ...activityType }));
+}
