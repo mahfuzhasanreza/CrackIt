@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toLocalDateTimeInput } from "@/lib/dates";
 
-import { initialActionState } from "../action-state";
+import { initialActionState } from "@/lib/action-state";
 import { deleteEntryAction, saveEntryAction } from "../actions";
 import type { EntryOptions } from "../options";
 import type { TimeEntryView } from "../service";

@@ -9,11 +9,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatDuration } from "@/lib/dates";
 
+import { useToastAction } from "@/hooks/use-toast-action";
+
 import { useNoResetSubmit } from "../../time-tracking/components/hooks";
 import { saveDailyLogAction } from "../actions";
 import type { DailyLogView } from "../service";
-
-import { useToastAction } from "./use-toast-action";
 
 const MOOD = ["", "Awful", "Low", "Okay", "Good", "Great"];
 const ENERGY = ["", "Drained", "Tired", "Okay", "Energetic", "Fired up"];

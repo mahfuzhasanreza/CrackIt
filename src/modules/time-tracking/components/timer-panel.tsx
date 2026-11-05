@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatTime } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 
-import { initialActionState } from "../action-state";
+import { initialActionState } from "@/lib/action-state";
 import { startTimerAction, stopTimerAction } from "../actions";
 import type { EntryOptions } from "../options";
 import type { TimeEntryView } from "../service";

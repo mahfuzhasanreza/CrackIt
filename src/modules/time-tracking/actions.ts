@@ -1,41 +1,17 @@
 "use server";
 
-import { refresh } from "next/cache";
-
 import { parseLocalDateTime } from "@/lib/dates";
-import type { Result } from "@/lib/result";
-
-import type { ActionState } from "./action-state";
+import {
+  formFields as fields,
+  invalidState as invalid,
+  toActionState as toState,
+} from "@/lib/action-result";
+import type { ActionState } from "@/lib/action-state";
 
 import { requireUser } from "../auth/dal";
 
 import * as service from "./service";
 import { entryFormSchema, startTimerSchema, stopTimerSchema } from "./validators";
-
-function toState<T>(result: Result<T>, successMessage: string): ActionState {
-  const submittedAt = Date.now();
-  if (result.ok) {
-    refresh();
-    return { status: "success", message: successMessage, submittedAt };
-  }
-  return {
-    status: "error",
-    message: result.error.message,
-    fieldErrors: result.error.fieldErrors,
-    submittedAt,
-  };
-}
-
-function invalid(fieldErrors: Record<string, string[] | undefined>): ActionState {
-  return {
-    status: "error",
-    message: "Check the highlighted fields.",
-    fieldErrors,
-    submittedAt: Date.now(),
-  };
-}
-
-const fields = (formData: FormData) => Object.fromEntries(formData.entries());
 
 export async function startTimerAction(
   _prev: ActionState,

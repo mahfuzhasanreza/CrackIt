@@ -4,9 +4,9 @@ import { Check, RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-import { reviewLearningEntryAction } from "../actions";
+import { useToastAction } from "@/hooks/use-toast-action";
 
-import { useToastAction } from "./use-toast-action";
+import { reviewLearningEntryAction } from "../actions";
 
 /** "Remembered" / "Forgot" for one entry; the server schedules the next revision. */
 export function ReviewButtons({ id, title }: { id: string; title: string }) {

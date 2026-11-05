@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 
-import type { ActionState } from "../action-state";
+import type { ActionState } from "@/lib/action-state";
 
 /** Current time, ticking every `intervalMs`. Starts at `initial` so SSR and hydration match. */
 export function useNow(initial: Date, intervalMs = 1000): Date {
