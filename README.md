@@ -1,5 +1,7 @@
 # CrackIt
 
+[![CI](https://github.com/mahfuzhasanreza/CrackIt/actions/workflows/ci.yml/badge.svg)](https://github.com/mahfuzhasanreza/CrackIt/actions/workflows/ci.yml)
+
 Personal tracker for cracking interviews — software engineer / full-stack and university
 lecturer prep. Tracks time (study, gaps, sleep, other), what was learned, checklists, problems,
 applications and interviews.
