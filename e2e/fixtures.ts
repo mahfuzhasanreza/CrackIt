@@ -10,6 +10,11 @@ export const USERS = {
     password: "topics-password-1234",
     name: "Topics User",
   },
+  checklists: {
+    email: "e2e-checklists@crackit.local",
+    password: "checklists-password-1234",
+    name: "Checklists User",
+  },
   journal: {
     email: "e2e-journal@crackit.local",
     password: "journal-password-1234",

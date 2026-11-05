@@ -134,6 +134,14 @@ UI (Server/Client Components)
 - Learning entries revise at +1, +3, +7, +14, +30 days (`journal/spaced-repetition.ts`);
   "forgot" restarts the schedule. Tags are lower-cased per user; unused tags are deleted.
 
+## Topics & checklists rules
+
+- Roadmap progress counts leaf topics only (not started 0, learning ⅓, revising ⅔,
+  confident 1); time per topic rolls up to parents (`tracks-topics/roadmap.ts`). Max 4 levels.
+- Checklist `type` and `recurrence` are fixed after creation; HABIT ⇔ recurrence ≠ NONE (DB CHECK).
+  Habits are ticked per period (logical day, or Monday of the week) in
+  `checklist_item_completions`; other items use `done_at`. Streaks: `checklists/habits.ts`.
+
 ## Charts & colors
 
 - Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark

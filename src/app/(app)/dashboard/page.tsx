@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/modules/auth/dal";
+import { TodayChecklist } from "@/modules/checklists/components/today-checklist";
+import { getTodayChecklist } from "@/modules/checklists/service";
 import { Last7Chart } from "@/modules/dashboard/components/last7-chart";
 import { StatTiles } from "@/modules/dashboard/components/stat-tiles";
 import { TodayStrip } from "@/modules/dashboard/components/today-strip";
@@ -34,7 +36,7 @@ export default function DashboardPage() {
 
 async function DashboardContent() {
   const user = await requireUser();
-  const data = await getDashboard(user);
+  const [data, checklist] = await Promise.all([getDashboard(user), getTodayChecklist(user)]);
   const today = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -84,6 +86,25 @@ async function DashboardContent() {
         </CardHeader>
         <CardContent>
           <TodayStrip day={data.today} tracks={data.tracks} timezone={user.timezone} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <h2>Today&apos;s checklist</h2>
+          </CardTitle>
+          <CardDescription>Habits and anything due. Tick them off here.</CardDescription>
+          <CardAction>
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/checklists">
+                Checklists <ArrowRight />
+              </Link>
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent>
+          <TodayChecklist habits={checklist.habits} due={checklist.due} />
         </CardContent>
       </Card>
 

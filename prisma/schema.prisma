@@ -29,13 +29,16 @@ model User {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tracks          Track[]
-  topics          Topic[]
-  activityTypes   ActivityType[]
-  timeEntries     TimeEntry[]
-  dailyLogs       DailyLog[]
-  learningEntries LearningEntry[]
-  tags            Tag[]
+  tracks                   Track[]
+  topics                   Topic[]
+  activityTypes            ActivityType[]
+  timeEntries              TimeEntry[]
+  dailyLogs                DailyLog[]
+  learningEntries          LearningEntry[]
+  tags                     Tag[]
+  checklists               Checklist[]
+  checklistItems           ChecklistItem[]
+  checklistItemCompletions ChecklistItemCompletion[]
 
   @@map("users")
 }
@@ -57,6 +60,7 @@ model Track {
   topics          Topic[]
   timeEntries     TimeEntry[]
   learningEntries LearningEntry[]
+  checklists      Checklist[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -270,4 +274,84 @@ model LearningEntryTag {
   @@id([learningEntryId, tagId])
   @@index([tagId])
   @@map("learning_entry_tags")
+}
+
+// ─── Checklists & habits ─────────────────────────────────────────────────────
+
+enum ChecklistType {
+  ROADMAP
+  ONE_OFF
+  HABIT
+
+  @@map("checklist_type")
+}
+
+enum Recurrence {
+  NONE
+  DAILY
+  WEEKLY
+
+  @@map("recurrence")
+}
+
+/// A list of items. HABIT lists recur (DAILY/WEEKLY) and are ticked per period; the others are
+/// ticked once (done_at). CHECK in the migration: recurrence <> NONE exactly when type = HABIT.
+model Checklist {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  userId      String        @map("user_id") @db.Uuid
+  trackId     String?       @map("track_id") @db.Uuid
+  title       String
+  description String?
+  type        ChecklistType
+  recurrence  Recurrence    @default(NONE)
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track?          @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  items ChecklistItem[]
+
+  @@index([userId, sortOrder])
+  @@index([trackId])
+  @@map("checklists")
+}
+
+model ChecklistItem {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  checklistId String    @map("checklist_id") @db.Uuid
+  title       String
+  sortOrder   Int       @default(0) @map("sort_order")
+  /// Logical day it's due (non-habit lists).
+  dueOn       DateTime? @map("due_on") @db.Date
+  /// 0 normal, 1 high, 2 urgent
+  priority    Int       @default(0) @db.SmallInt
+  /// When a non-recurring item was ticked. Habits use completions instead.
+  doneAt      DateTime? @map("done_at") @db.Timestamptz(3)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user        User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  checklist   Checklist                 @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  completions ChecklistItemCompletion[]
+
+  @@index([checklistId, sortOrder])
+  @@index([userId, dueOn])
+  @@map("checklist_items")
+}
+
+/// A habit ticked for one period: the logical day (DAILY) or the Monday of the week (WEEKLY).
+model ChecklistItemCompletion {
+  itemId    String   @map("item_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  period    DateTime @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  item ChecklistItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([itemId, period])
+  @@index([userId, period])
+  @@map("checklist_item_completions")
 }
