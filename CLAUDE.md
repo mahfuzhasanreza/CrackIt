@@ -107,14 +107,15 @@ UI (Server/Client Components)
 ## Forms & Server Actions
 
 - Actions in `src/modules/<feature>/actions.ts` take `(prevState, formData)` and return
-  `ActionState` (`src/modules/time-tracking/action-state.ts`); `"use server"` files may only
+  `ActionState` (`src/lib/action-state.ts`; build it with `toActionState` / `invalidState` /
+  `formFields` from `src/lib/action-result.ts`); `"use server"` files may only
   export async functions, so shared constants/types live elsewhere.
 - After a successful mutation call `refresh()` from `next/cache` (nothing is cached yet).
 - Submit with `useNoResetSubmit(action)` (not `<form action>`) when the form must keep input on
   validation errors — React 19 resets forms after every action, and Radix Selects reset too.
 - Show feedback with `useActionFeedback(state, onSuccess)` (sonner toasts). If the mutation can
   unmount the submitting component (a deleted card, an item leaving a list), use
-  `useToastAction(action, onSuccess)` from `src/modules/journal/components/use-toast-action.ts`
+  `useToastAction(action, onSuccess)` from `@/hooks/use-toast-action`
   instead: it toasts when the action returns, not in an effect.
 - Render user markdown with `<Markdown>` from `@/components/markdown` (no raw HTML). 1–5 scales
   use `<RatingInput>` from `@/components/rating-input`.

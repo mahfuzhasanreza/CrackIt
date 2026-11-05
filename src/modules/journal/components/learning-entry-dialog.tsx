@@ -27,12 +27,12 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
+import { useToastAction } from "@/hooks/use-toast-action";
+
 import { useNoResetSubmit } from "../../time-tracking/components/hooks";
 import type { TrackOption } from "../../tracks-topics/repository";
 import { deleteLearningEntryAction, saveLearningEntryAction } from "../actions";
 import type { LearningEntryView } from "../service";
-
-import { useToastAction } from "./use-toast-action";
 
 const NONE = "__none";
 const CONFIDENCE = ["", "Shaky", "Vague", "Okay", "Solid", "Could teach it"];

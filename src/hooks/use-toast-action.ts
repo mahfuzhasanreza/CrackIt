@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 
-import { type ActionState, initialActionState } from "../../time-tracking/action-state";
+import { type ActionState, initialActionState } from "@/lib/action-state";
 
 type Action = (prev: ActionState, formData: FormData) => Promise<ActionState>;
 

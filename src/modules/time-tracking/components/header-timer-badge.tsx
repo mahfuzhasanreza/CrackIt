@@ -6,7 +6,7 @@ import { useActionState } from "react";
 
 import { Button } from "@/components/ui/button";
 
-import { initialActionState } from "../action-state";
+import { initialActionState } from "@/lib/action-state";
 import { stopTimerAction } from "../actions";
 
 import { Elapsed } from "./elapsed";

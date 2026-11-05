@@ -32,7 +32,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Prepare",
     items: [
-      { title: "Topics", href: "/topics", icon: ListTree, ready: false },
+      { title: "Topics", href: "/topics", icon: ListTree, ready: true },
       { title: "Checklists", href: "/checklists", icon: ListChecks, ready: false },
       { title: "Problems", href: "/problems", icon: Code, ready: false },
       { title: "Lecturer", href: "/lecturer", icon: GraduationCap, ready: false },
