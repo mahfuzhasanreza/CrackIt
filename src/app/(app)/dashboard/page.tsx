@@ -139,7 +139,7 @@ async function DashboardContent() {
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-14 w-72" />
+      <Skeleton className="h-14 w-full max-w-72" />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <Skeleton key={i} className="h-24" />

@@ -93,7 +93,7 @@ async function TimelineContent({ searchParams }: Pick<PageProps<"/timeline">, "s
 function TimelineSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-12 w-80" />
+      <Skeleton className="h-12 w-full max-w-80" />
       <Skeleton className="h-20 w-full" />
       <Skeleton className="h-[600px] w-full" />
     </div>

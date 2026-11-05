@@ -44,7 +44,7 @@ export function DailyLogForm({
     <form key={dateKey} onSubmit={onSubmit} className="flex flex-col gap-6" aria-label="Daily log">
       <input type="hidden" name="date" value={dateKey} />
 
-      <div className="grid gap-6 sm:grid-cols-3">
+      <div className="flex flex-wrap gap-x-10 gap-y-6">
         <RatingInput
           name="mood"
           legend="Mood"

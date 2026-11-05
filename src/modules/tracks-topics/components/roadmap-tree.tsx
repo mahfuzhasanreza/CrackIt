@@ -168,7 +168,7 @@ function TopicItem({
           "group flex min-h-11 flex-wrap items-center gap-x-3 gap-y-1 rounded-md py-1 pr-1 hover:bg-accent/50",
           moving && "opacity-60",
         )}
-        style={{ paddingLeft: `${node.depth * 1.25 + 0.25}rem` }}
+        style={{ paddingLeft: `${node.depth * 1 + 0.25}rem` }}
       >
         <div className="flex min-w-0 flex-1 basis-56 items-center gap-1.5">
           {isParent ? (
@@ -194,11 +194,11 @@ function TopicItem({
           )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           {isParent ? (
-            <div className="flex w-44 items-center gap-2">
+            <div className="flex w-36 items-center gap-2 sm:w-44">
               <ProgressMeter value={node.progress} label={`${node.name} progress`} />
-              <span className="w-16 text-right text-xs text-muted-foreground tabular-nums">
+              <span className="w-12 text-right text-xs text-muted-foreground tabular-nums sm:w-16">
                 {node.counts.CONFIDENT}/{node.leafCount}
               </span>
             </div>
@@ -206,7 +206,7 @@ function TopicItem({
             <StatusSelect id={node.id} name={node.name} status={node.status} />
           )}
           <span
-            className="w-16 text-right text-xs text-muted-foreground tabular-nums"
+            className="w-12 text-right text-xs text-muted-foreground tabular-nums sm:w-16"
             title="Time logged (including subtopics)"
           >
             {node.totalMs > 0 ? formatDuration(node.totalMs) : "–"}
@@ -288,7 +288,7 @@ function StatusSelect({ id, name, status }: { id: string; name: string; status: 
         })
       }
     >
-      <SelectTrigger size="sm" className="w-44" aria-label={`Status of ${name}`}>
+      <SelectTrigger size="sm" className="w-36 sm:w-44" aria-label={`Status of ${name}`}>
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
