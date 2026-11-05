@@ -14,3 +14,8 @@ updates:
     directory: /
     schedule: { interval: weekly, day: monday }
     commit-message: { prefix: "ci" }
+
+  - package-ecosystem: docker
+    directory: /
+    schedule: { interval: weekly, day: monday }
+    commit-message: { prefix: "chore(docker)" }

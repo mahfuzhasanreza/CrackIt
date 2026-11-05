@@ -1,0 +1,57 @@
+name: Deploy verification
+
+# Vercel's Git integration builds and deploys every push. Its build runs `pnpm vercel-build`
+# (= `prisma migrate deploy && next build`), so migrations are applied to the matching Neon
+# branch before a deployment can go live; a failed migration fails the build and nothing ships.
+# Vercel then reports a GitHub deployment status, which triggers this smoke test:
+#   migrate (Vercel build) → deploy (Vercel) → smoke test (here)
+# main is protected by the CI checks, so only code that passed CI reaches production.
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Smoke test (${{ github.event.deployment.environment }})
+    if: github.event.deployment_status.state == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      URL: ${{ github.event.deployment_status.environment_url }}
+      ENVIRONMENT: ${{ github.event.deployment.environment }}
+      # Optional: Vercel → Settings → Deployment Protection → Protection Bypass for Automation.
+      # Without it, protected preview deployments are skipped (production is always checked).
+      BYPASS: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+    steps:
+      - name: Check /api/health
+        run: |
+          if [ "$ENVIRONMENT" != "Production" ] && [ -z "$BYPASS" ]; then
+            echo "::notice::Preview smoke test skipped (no VERCEL_AUTOMATION_BYPASS_SECRET)."
+            exit 0
+          fi
+          headers=()
+          [ -n "$BYPASS" ] && headers=(-H "x-vercel-protection-bypass: $BYPASS")
+          for attempt in 1 2 3 4 5; do
+            body=$(curl -fsS --max-time 15 "${headers[@]}" "$URL/api/health") && break
+            echo "Attempt $attempt failed; retrying in 10s"
+            body=""
+            sleep 10
+          done
+          echo "$body"
+          [ "$(echo "$body" | jq -r '.status + "/" + .db')" = "ok/up" ] || {
+            echo "::error::$URL/api/health is not healthy"
+            exit 1
+          }
+
+      - name: Login page renders
+        run: |
+          headers=()
+          [ -n "$BYPASS" ] && headers=(-H "x-vercel-protection-bypass: $BYPASS")
+          if [ "$ENVIRONMENT" != "Production" ] && [ -z "$BYPASS" ]; then exit 0; fi
+          curl -fsS --max-time 15 "${headers[@]}" "$URL/login" | grep -q "<form" || {
+            echo "::error::$URL/login did not render a form"
+            exit 1
+          }

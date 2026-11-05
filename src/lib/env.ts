@@ -17,6 +17,8 @@ const serverEnvSchema = z.object({
   DATABASE_URL: postgresUrl,
   /** Migrations only (Neon: the direct URL). Read by prisma.config.ts, optional locally. */
   DIRECT_URL: postgresUrl.optional(),
+  /** Direct URL set by the Neon–Vercel integration (per preview branch). Migrations only. */
+  DATABASE_URL_UNPOOLED: postgresUrl.optional(),
   /** Signs/encrypts session JWTs. Generate with `openssl rand -base64 32`. */
   AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
 });

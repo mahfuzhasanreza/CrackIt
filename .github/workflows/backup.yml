@@ -1,0 +1,61 @@
+name: Database backup
+
+# Nightly logical backup of the production database, encrypted and kept as a workflow artifact
+# for 30 days. Complements Neon's point-in-time restore (short window on the free plan).
+#
+# Secrets:
+#   BACKUP_DATABASE_URL  Neon *direct* (non-pooled) connection string for the production branch
+#   BACKUP_PASSPHRASE    long random passphrase; store it in your password manager too
+#
+# Restore:
+#   gpg --batch --passphrase "$BACKUP_PASSPHRASE" -d crackit-<stamp>.dump.gpg > crackit.dump
+#   pg_restore --clean --if-exists --no-owner --no-acl -d "$TARGET_DIRECT_URL" crackit.dump
+
+on:
+  schedule:
+    - cron: "30 21 * * *" # 03:30 Asia/Dhaka
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    name: pg_dump → encrypted artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+      PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+    steps:
+      - name: Check secrets
+        run: |
+          if [ -z "$DATABASE_URL" ] || [ -z "$PASSPHRASE" ]; then
+            echo "::error::Set BACKUP_DATABASE_URL and BACKUP_PASSPHRASE repository secrets."
+            exit 1
+          fi
+
+      - name: Dump and encrypt
+        run: |
+          stamp=$(date -u +%Y%m%dT%H%M%SZ)
+          echo "STAMP=$stamp" >> "$GITHUB_ENV"
+          # pg_dump must be >= the server's major version; 17 covers Neon's 16 and 17.
+          docker run --rm -e DATABASE_URL postgres:17-alpine \
+            sh -c 'pg_dump --format=custom --no-owner --no-acl "$DATABASE_URL"' > crackit.dump
+          test -s crackit.dump
+          docker run --rm -v "$PWD:/w" postgres:17-alpine pg_restore --list /w/crackit.dump > /dev/null
+          gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" \
+            -o "crackit-$stamp.dump.gpg" crackit.dump
+          rm crackit.dump
+          ls -lh "crackit-$stamp.dump.gpg"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: db-backup-${{ env.STAMP }}
+          path: crackit-*.dump.gpg
+          retention-days: 30
+          if-no-files-found: error
