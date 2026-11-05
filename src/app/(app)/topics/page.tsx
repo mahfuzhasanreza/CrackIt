@@ -129,8 +129,8 @@ async function TopicsContent({ searchParams }: Pick<PageProps<"/topics">, "searc
 function TopicsSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-14 w-72" />
-      <Skeleton className="h-9 w-96" />
+      <Skeleton className="h-14 w-full max-w-72" />
+      <Skeleton className="h-9 w-full max-w-96" />
       <Skeleton className="h-36 w-full" />
       <Skeleton className="h-[480px] w-full" />
     </div>

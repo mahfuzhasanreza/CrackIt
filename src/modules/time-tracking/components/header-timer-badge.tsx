@@ -23,7 +23,8 @@ export function HeaderTimerBadge({ running, serverNow }: { running: Running; ser
       <Button asChild variant="outline" size="sm">
         <Link href="/timer">
           <Play />
-          Start timer
+          {/* Icon-only on the narrowest phones; the name stays for screen readers. */}
+          <span className="sr-only sm:not-sr-only">Start timer</span>
         </Link>
       </Button>
     );

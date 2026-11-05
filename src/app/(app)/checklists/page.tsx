@@ -78,7 +78,7 @@ async function ChecklistsContent() {
 function ChecklistsSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-14 w-72" />
+      <Skeleton className="h-14 w-full max-w-72" />
       <div className="grid gap-4 md:grid-cols-2">
         <Skeleton className="h-64" />
         <Skeleton className="h-64" />

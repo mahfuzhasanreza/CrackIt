@@ -120,6 +120,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html {
+    /* Always reserve the scrollbar's width so the header doesn't shift between short pages
+       (no scrollbar) and long ones (scrollbar) on systems with classic scrollbars. */
+    scrollbar-gutter: stable;
+  }
   body {
     @apply bg-background text-foreground;
   }

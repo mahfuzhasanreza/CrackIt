@@ -161,7 +161,7 @@ async function JournalContent({ searchParams }: Pick<PageProps<"/journal">, "sea
 function JournalSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Skeleton className="h-12 w-80" />
+      <Skeleton className="h-12 w-full max-w-80" />
       <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
         <Skeleton className="h-[520px] w-full" />
         <Skeleton className="h-64 w-full" />
