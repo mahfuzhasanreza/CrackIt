@@ -1,6 +1,7 @@
 import "server-only";
 
 import {
+  dateKeyToDb,
   dateKeysBetween,
   dayWindow,
   logicalDateKey,
@@ -8,6 +9,8 @@ import {
   weekStartKey,
 } from "@/lib/dates";
 
+import { countLearningEntries } from "../journal/repository";
+import { countDueProblems } from "../problems/repository";
 import { listTrackOptions, type TrackOption } from "../tracks-topics/repository";
 import { listEntrySpans } from "../time-tracking/repository";
 import { type DayView, getDay } from "../time-tracking/service";
@@ -56,4 +59,16 @@ export async function getDashboard(user: DashboardUser, now = new Date()): Promi
     tracks,
     streak: { ...computeStreak(totals, STREAK_MIN_STUDY_MS), thresholdMs: STREAK_MIN_STUDY_MS },
   };
+}
+
+export type RevisionDue = { notes: number; problems: number };
+
+/** Learning notes and problems due for revision today (overdue included). */
+export async function getRevisionDue(user: DashboardUser, now = new Date()): Promise<RevisionDue> {
+  const today = dateKeyToDb(logicalDateKey(now, user.timezone, user.dayStartHour));
+  const [notes, problems] = await Promise.all([
+    countLearningEntries(user.id, { dueOnOrBefore: today }),
+    countDueProblems(user.id, today),
+  ]);
+  return { notes, problems };
 }

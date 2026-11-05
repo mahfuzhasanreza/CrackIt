@@ -131,8 +131,10 @@ UI (Server/Client Components)
 
 - One `daily_logs` row per user per logical day (`date` is `@db.Date`; convert with
   `dateKeyToDb` / `dbDateToKey`). Bedtime ≥ 12:00 is the night before; see `journal/sleep.ts`.
-- Learning entries revise at +1, +3, +7, +14, +30 days (`journal/spaced-repetition.ts`);
-  "forgot" restarts the schedule. Tags are lower-cased per user; unused tags are deleted.
+- Learning entries revise at +1, +3, +7, +14, +30 days (`src/lib/spaced-repetition.ts`);
+  "forgot" restarts the schedule. Tags (`src/lib/tags.ts`, storage in `modules/tags`) are
+  lower-cased per user and shared by learning notes and problems; unused tags are deleted
+  (add new taggables to `deleteOrphanTags`).
 
 ## Topics & checklists rules
 
@@ -141,6 +143,13 @@ UI (Server/Client Components)
 - Checklist `type` and `recurrence` are fixed after creation; HABIT ⇔ recurrence ≠ NONE (DB CHECK).
   Habits are ticked per period (logical day, or Monday of the week) in
   `checklist_item_completions`; other items use `done_at`. Streaks: `checklists/habits.ts`.
+
+## Problems & projects rules
+
+- Problem status changes live in `problems/rules.ts` (pure): an attempt adds time and an
+  attempt; solving sets SOLVED, keeps the first `solved_at` and schedules a revision tomorrow;
+  failing a previously solved problem → NEEDS_REVISION; revision "forgot" → NEEDS_REVISION.
+  DB CHECK: SOLVED / NEEDS_REVISION require `solved_at`. One problem per link per user.
 
 ## Charts & colors
 

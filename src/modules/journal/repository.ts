@@ -2,6 +2,8 @@ import "server-only";
 
 import { db } from "@/lib/db";
 
+import { deleteOrphanTags, upsertTagIds } from "../tags/repository";
+
 import type { Prisma } from "@/generated/prisma/client";
 
 type Tx = Prisma.TransactionClient;
@@ -88,20 +90,10 @@ export type LearningEntryData = Omit<
 
 async function setTags(tx: Tx, userId: string, entryId: string, names: string[]) {
   await tx.learningEntryTag.deleteMany({ where: { learningEntryId: entryId } });
-  for (const name of names) {
-    const tag = await tx.tag.upsert({
-      where: { userId_name: { userId, name } },
-      create: { userId, name },
-      update: {},
-      select: { id: true },
-    });
-    await tx.learningEntryTag.create({ data: { learningEntryId: entryId, tagId: tag.id } });
-  }
-}
-
-/** Tags no longer used anywhere. (Add other taggables here when problems get tags.) */
-function deleteOrphanTags(tx: Tx, userId: string) {
-  return tx.tag.deleteMany({ where: { userId, learningEntries: { none: {} } } });
+  const tagIds = await upsertTagIds(tx, userId, names);
+  await tx.learningEntryTag.createMany({
+    data: tagIds.map((tagId) => ({ learningEntryId: entryId, tagId })),
+  });
 }
 
 export function createLearningEntry(userId: string, data: LearningEntryData, tags: string[]) {

@@ -7,7 +7,7 @@ import { findOwnedTopic, findOwnedTrack } from "../tracks-topics/repository";
 
 import * as repo from "./repository";
 import { resolveSleepTimes, sleepDurationMs, sleepError, toTimeInput } from "./sleep";
-import { initialReview, nextReview, type ReviewOutcome } from "./spaced-repetition";
+import { initialReview, nextReview, type ReviewOutcome } from "@/lib/spaced-repetition";
 import type { DailyLogFormInput, LearningEntryInput, LearningFilter } from "./validators";
 
 type UserCtx = { id: string; timezone: string; dayStartHour: number };

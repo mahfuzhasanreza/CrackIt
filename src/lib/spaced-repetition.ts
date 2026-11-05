@@ -1,7 +1,7 @@
 import { shiftDateKey } from "@/lib/dates";
 
 /**
- * Spaced repetition (PLAN rule 7): revise +1, +3, +7, +14, +30 days apart. Each successful
+ * Spaced repetition (PLAN rule 7), shared by learning notes and problems: revise +1, +3, +7, +14, +30 days apart. Each successful
  * review moves one step along; forgetting starts again from the first step. `stage` counts
  * successful reviews in a row; after the last step the entry is done (no revisit date).
  */
