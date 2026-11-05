@@ -12,7 +12,9 @@ import { env } from "./env";
  */
 function createPrismaClient() {
   return new PrismaClient({
-    adapter: new PrismaPg({ connectionString: env.DATABASE_URL }),
+    // Small pool: on Vercel each function instance holds its own pool, and Neon's pooler
+    // (DATABASE_URL) multiplexes them onto real connections.
+    adapter: new PrismaPg({ connectionString: env.DATABASE_URL, max: 5 }),
     log: env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
   });
 }

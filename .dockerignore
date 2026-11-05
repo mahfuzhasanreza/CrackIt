@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+.next
+src/generated
+coverage
+test-results
+playwright-report
+blob-report
+.env
+.env.*
+!.env.example
+*.log
+Dockerfile
+.dockerignore
