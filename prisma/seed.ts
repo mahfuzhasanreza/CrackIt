@@ -1,28 +1,38 @@
 /**
- * Development seed: ensures a dev user exists and gives it the default data.
- * Run with `pnpm db:seed`. Idempotent.
- * (Real accounts are created with `pnpm user:create` from Phase 2.)
+ * Development seed: ensures a dev user (with a password) exists and has the default data.
+ * Run with `pnpm db:seed`. Idempotent. Refuses to run in production.
+ * Real accounts are created with `pnpm user:create`.
  */
-import "dotenv/config";
+import { hashPassword } from "../src/modules/auth/password";
+import { newPasswordSchema } from "../src/modules/auth/validators";
 
-import { PrismaPg } from "@prisma/adapter-pg";
-
-import { PrismaClient } from "../src/generated/prisma/client";
-
+import { createScriptClient } from "./client";
 import { seedDefaultsForUser } from "./seed-defaults";
 
-const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is not set (see .env.example)");
+if (process.env.NODE_ENV === "production") {
+  throw new Error("Refusing to seed a dev user in production. Use `pnpm user:create`.");
+}
 
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+const prisma = createScriptClient();
 
 async function main() {
   const email = (process.env.SEED_USER_EMAIL ?? "dev@crackit.local").toLowerCase();
+  const password = newPasswordSchema.parse(
+    process.env.SEED_USER_PASSWORD ?? "crackit-dev-password",
+  );
+
   const user = await prisma.user.upsert({
     where: { email },
     update: {},
     create: { email, name: "Dev User" },
   });
+  if (!user.passwordHash) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: await hashPassword(password) },
+    });
+    console.log(`Set dev password for ${email}`);
+  }
   await seedDefaultsForUser(prisma, user.id);
 
   const [tracks, topics, activityTypes] = await Promise.all([

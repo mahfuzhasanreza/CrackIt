@@ -17,7 +17,8 @@ const serverEnvSchema = z.object({
   DATABASE_URL: postgresUrl,
   /** Migrations only (Neon: the direct URL). Read by prisma.config.ts, optional locally. */
   DIRECT_URL: postgresUrl.optional(),
-  // Phase 2: AUTH_SECRET: z.string().min(32),
+  /** Signs/encrypts session JWTs. Generate with `openssl rand -base64 32`. */
+  AUTH_SECRET: z.string().min(32, "must be at least 32 characters"),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

@@ -2,7 +2,8 @@
  * Typed result returned by Server Actions and services.
  * Expected failures (validation, not found, conflicts) are values, not thrown errors.
  */
-export type ErrorCode = "VALIDATION" | "UNAUTHORIZED" | "NOT_FOUND" | "CONFLICT" | "INTERNAL";
+export type ErrorCode =
+  "VALIDATION" | "UNAUTHORIZED" | "RATE_LIMITED" | "NOT_FOUND" | "CONFLICT" | "INTERNAL";
 
 export type AppError = {
   code: ErrorCode;

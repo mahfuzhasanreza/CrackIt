@@ -64,7 +64,21 @@ UI (Server/Client Components)
 | `pnpm db:deploy` | Apply pending migrations (CI / prod) |
 | `pnpm db:seed` / `pnpm db:reset` / `pnpm db:studio` | Seed dev user + defaults / reset DB / browse data |
 
-Added in later phases: `user:create`, `test:e2e`.
+| `pnpm user:create -- --email <e> [--name <n>]` | Create a login (password prompted; or `CRACKIT_PASSWORD`) |
+| `pnpm user:reset-password -- --email <e>` | New password + sign out all sessions |
+| `pnpm test:e2e` | Playwright against the prod build + test DB (`pnpm build` first) |
+
+## Auth
+
+- Auth.js v5 Credentials, JWT sessions (`src/auth.ts`); logic in `src/modules/auth/`.
+- `src/proxy.ts` only does optimistic redirects (signed JWT present). `/login` is always
+  reachable so a stale JWT can't cause a redirect loop.
+- Authoritative check = DAL: `getCurrentUser()` / `requireUser()` from `@/modules/auth/dal`
+  (verifies the user still exists and `sessionVersion` matches). Call `requireUser()` in every
+  page that shows user data **and** in every Server Action / Route Handler.
+- Anything reading the session must render inside `<Suspense>` (Cache Components); never
+  `await` the session at the top level of a layout.
+- Rate limit: 5 failures / 15 min per email, 20 per IP (`login_attempts` table).
 
 ## Prisma 7 notes
 

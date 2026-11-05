@@ -16,14 +16,18 @@ datasource db {
 // ─── Core ────────────────────────────────────────────────────────────────────
 
 model User {
-  id           String   @id @default(uuid(7)) @db.Uuid
-  email        String   @unique // always stored lower-cased
-  name         String?
-  timezone     String   @default("Asia/Dhaka") // IANA tz name
+  id             String   @id @default(uuid(7)) @db.Uuid
+  email          String   @unique // always stored lower-cased
+  name           String?
+  /// argon2id hash. NULL = no password set yet (cannot log in).
+  passwordHash   String?  @map("password_hash")
+  /// Bumped on password change/reset; JWTs carrying an older version are rejected.
+  sessionVersion Int      @default(0) @map("session_version")
+  timezone       String   @default("Asia/Dhaka") // IANA tz name
   /// Hour (0-23, local time) at which a "day" starts. 4 = a day runs 04:00 → 04:00.
-  dayStartHour Int      @default(4) @map("day_start_hour") @db.SmallInt
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  dayStartHour   Int      @default(4) @map("day_start_hour") @db.SmallInt
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
   tracks        Track[]
   topics        Topic[]
@@ -85,6 +89,19 @@ model Topic {
   @@index([userId, trackId])
   @@index([parentId])
   @@map("topics")
+}
+
+/// Every login attempt, for rate limiting / lockout and auditing.
+model LoginAttempt {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  email     String // lower-cased input, may not match a real user
+  ip        String?
+  success   Boolean
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([email, createdAt])
+  @@index([ip, createdAt])
+  @@map("login_attempts")
 }
 
 // ─── Time tracking ───────────────────────────────────────────────────────────

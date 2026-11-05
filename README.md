@@ -24,12 +24,21 @@ pnpm db:seed        # dev user + default tracks, topics, activity types
 pnpm dev            # http://localhost:3000
 ```
 
+Set `AUTH_SECRET` in `.env` (`openssl rand -base64 32`). Log in as the seeded dev user
+`dev@crackit.local` / `crackit-dev-password`, or create your own account (there is no sign-up page):
+
+```bash
+pnpm user:create --email you@example.com --name "Your Name"   # prompts for a password (12+ chars)
+pnpm user:reset-password --email you@example.com                # also signs out all sessions
+```
+
 ## Scripts
 
 ```bash
 pnpm check          # lint + typecheck + format check + unit tests
 pnpm build          # production build
 pnpm test:watch     # tests in watch mode
+pnpm build && pnpm test:e2e   # Playwright e2e (uses the test DB on :5434)
 ```
 
 Health check: `GET /api/health` (includes a database ping).

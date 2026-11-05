@@ -24,15 +24,20 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
     "db:reset": "prisma migrate reset",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "user:create": "tsx scripts/create-user.ts",
+    "user:reset-password": "tsx scripts/reset-password.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
+    "@node-rs/argon2": "2.2.2",
     "@prisma/adapter-pg": "7.10.1",
     "@prisma/client": "7.10.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.2",
     "lucide-react": "^1.69.0",
     "next": "16.4.2",
+    "next-auth": "5.0.0-beta.32",
     "next-themes": "^0.4.6",
     "pg": "^8.23.1",
     "radix-ui": "^1.8.1",
@@ -45,6 +50,7 @@
   "devDependencies": {
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/turbopack": "^4",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
