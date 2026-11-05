@@ -257,7 +257,7 @@ Vercel builds and runs the app itself, so Docker's job here is **local developme
 **Neon + Prisma connection strings**
 
 - `DATABASE_URL` = Neon **pooled** URL (`-pooler` host) → used by the app at runtime.
-- `DIRECT_URL` = Neon **direct** URL → used by `prisma migrate` (set `directUrl` in `schema.prisma` datasource).
+- `DIRECT_URL` = Neon **direct** URL → used by the Prisma CLI (`migrate`, `studio`, `db seed`). Prisma 7 no longer has `directUrl` in `schema.prisma`; `prisma.config.ts` picks `DIRECT_URL ?? DATABASE_URL`, and the app connects through the `@prisma/adapter-pg` driver adapter with `DATABASE_URL`.
 
 **`ci.yml`** — on every PR and push:
 

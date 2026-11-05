@@ -8,7 +8,7 @@ architecture plan is in `PLAN.md`; implement it phase by phase (section 11).
 ## Stack
 
 - Next.js 16 (App Router, Turbopack, `cacheComponents` + `partialPrefetching` on), React 19, TypeScript strict
-- PostgreSQL 16 + Prisma (local DB via Docker Compose; prod on Neon)
+- PostgreSQL 16 + Prisma 7 (local DB via Docker Compose on port 5433; prod on Neon)
 - Auth.js v5 Credentials (email + password, JWT sessions, no public sign-up)
 - Tailwind CSS v4 + shadcn/ui (Radix, `new-york`), lucide icons, sonner toasts, next-themes
 - Zod v4 for all validation; Vitest + Testing Library; Playwright for e2e
@@ -38,7 +38,7 @@ UI (Server/Client Components)
 - Feature code lives in `src/modules/<feature>/`:
   `validators.ts`, `repository.ts`, `service.ts`, `actions.ts`, `components/`, `__tests__/` (or `*.test.ts` beside the file).
 - Routes live in `src/app/` and stay thin: fetch via services, render module components.
-- Shared helpers: `src/lib/` (`env.ts`, `result.ts`, `utils.ts`, later `db.ts`, `dates.ts`).
+- Shared helpers: `src/lib/` (`env.ts`, `db.ts`, `result.ts`, `utils.ts`, later `dates.ts`).
 - Shared UI primitives: `src/components/ui/` (shadcn — add with `pnpm dlx shadcn@latest add <name>`).
 - Actions and services return `Result<T>` from `@/lib/result` (`ok(...)` / `err(code, msg)`);
   throw only for truly unexpected errors.
@@ -59,7 +59,26 @@ UI (Server/Client Components)
 | `pnpm test` / `pnpm test:watch` / `pnpm test:coverage` | Vitest                                                                 |
 | `pnpm check`                                           | lint + typecheck + format:check + test (run before finishing any task) |
 
-Added in later phases: `db:migrate`, `db:seed`, `db:studio`, `user:create`, `test:e2e`.
+| `pnpm db:up` / `pnpm db:down` | Start/stop local Postgres (dev :5433, test :5434) via Docker |
+| `pnpm db:migrate` | Create + apply a migration in dev (`-- --name <name>`) |
+| `pnpm db:deploy` | Apply pending migrations (CI / prod) |
+| `pnpm db:seed` / `pnpm db:reset` / `pnpm db:studio` | Seed dev user + defaults / reset DB / browse data |
+
+Added in later phases: `user:create`, `test:e2e`.
+
+## Prisma 7 notes
+
+- Config lives in `prisma.config.ts` (CLI URL = `DIRECT_URL ?? DATABASE_URL`, seed command).
+  The schema's `datasource` has no `url`.
+- Client is generated to `src/generated/prisma` (git-ignored, regenerated on `postinstall`).
+  Import types/enums from `@/generated/prisma/client` or `@/generated/prisma/enums`.
+- Runtime client is `db` from `@/lib/db` (uses `@prisma/adapter-pg`). Repositories only.
+- Constraints Prisma can't express (CHECK, `NULLS NOT DISTINCT`, partial/exclusion indexes):
+  `pnpm db:migrate -- --create-only --name <name>`, then hand-edit the SQL. Keep the matching
+  `@@unique`/`@@index` in the schema when one exists so Prisma doesn't see drift, and verify with
+  `pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`.
+- Default tracks/topics/activity types are data in `src/modules/*/defaults.ts`; seeding logic is
+  `prisma/seed-defaults.ts` (idempotent).
 
 ## Rules
 

@@ -1,0 +1,121 @@
+// CrackIt database schema.
+// Conventions: snake_case tables/columns via @map, UUIDv7 ids, timestamptz everywhere,
+// every user-owned row has user_id + created_at + updated_at.
+// Constraints Prisma can't express (partial/NULLS NOT DISTINCT indexes, CHECKs) are added as
+// raw SQL in the migration files — create with `pnpm db:migrate --create-only`, then edit.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Core ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  email        String   @unique // always stored lower-cased
+  name         String?
+  timezone     String   @default("Asia/Dhaka") // IANA tz name
+  /// Hour (0-23, local time) at which a "day" starts. 4 = a day runs 04:00 → 04:00.
+  dayStartHour Int      @default(4) @map("day_start_hour") @db.SmallInt
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  tracks        Track[]
+  topics        Topic[]
+  activityTypes ActivityType[]
+
+  @@map("users")
+}
+
+/// A prep track, e.g. "SWE / Full-Stack" or "University Lecturer".
+model Track {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  userId              String   @map("user_id") @db.Uuid
+  name                String
+  description         String?
+  color               String // hex, e.g. #2563eb
+  weeklyTargetMinutes Int?     @map("weekly_target_minutes")
+  isActive            Boolean  @default(true) @map("is_active")
+  sortOrder           Int      @default(0) @map("sort_order")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics Topic[]
+
+  @@unique([userId, name])
+  @@map("tracks")
+}
+
+enum TopicStatus {
+  NOT_STARTED
+  LEARNING
+  REVISING
+  CONFIDENT
+
+  @@map("topic_status")
+}
+
+/// Hierarchical roadmap item inside a track (e.g. DSA → Graphs → Dijkstra).
+model Topic {
+  id        String      @id @default(uuid(7)) @db.Uuid
+  userId    String      @map("user_id") @db.Uuid
+  trackId   String      @map("track_id") @db.Uuid
+  parentId  String?     @map("parent_id") @db.Uuid
+  name      String
+  status    TopicStatus @default(NOT_STARTED)
+  /// 0 = normal, higher = more important
+  priority  Int         @default(0) @db.SmallInt
+  sortOrder Int         @default(0) @map("sort_order")
+  createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track    Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  parent   Topic?  @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children Topic[] @relation("TopicTree")
+
+  // In SQL this index is NULLS NOT DISTINCT so root topics (parent_id NULL) are unique too.
+  @@unique([trackId, parentId, name])
+  @@index([userId, trackId])
+  @@index([parentId])
+  @@map("topics")
+}
+
+// ─── Time tracking ───────────────────────────────────────────────────────────
+
+enum ActivityCategory {
+  STUDY
+  SLEEP
+  BREAK
+  WORK
+  EXERCISE
+  PERSONAL
+  OTHER
+
+  @@map("activity_category")
+}
+
+/// What a time entry is spent on: Study, Sleep, Break/Gap, Meal, ... (user-configurable).
+model ActivityType {
+  id           String           @id @default(uuid(7)) @db.Uuid
+  userId       String           @map("user_id") @db.Uuid
+  name         String
+  color        String
+  category     ActivityCategory
+  isProductive Boolean          @default(false) @map("is_productive")
+  isArchived   Boolean          @default(false) @map("is_archived")
+  sortOrder    Int              @default(0) @map("sort_order")
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, name])
+  @@map("activity_types")
+}

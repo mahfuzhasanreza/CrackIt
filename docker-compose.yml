@@ -1,0 +1,50 @@
+# Local development services. App runs on the host with `pnpm dev`.
+# Ports 5433/5434 avoid clashing with a natively installed Postgres on 5432.
+name: crackit
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: crackit
+      POSTGRES_PASSWORD: crackit
+      POSTGRES_DB: crackit
+      TZ: UTC
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crackit -d crackit"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Throwaway database for integration tests (data lives in RAM).
+  postgres-test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: crackit
+      POSTGRES_PASSWORD: crackit
+      POSTGRES_DB: crackit_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U crackit -d crackit_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  adminer:
+    image: adminer:5
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+volumes:
+  pgdata:

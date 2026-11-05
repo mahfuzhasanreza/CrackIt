@@ -2,6 +2,10 @@ import "server-only";
 
 import { z } from "zod";
 
+const postgresUrl = z
+  .string()
+  .regex(/^postgres(ql)?:\/\//, "must be a postgres:// or postgresql:// connection string");
+
 /**
  * Server-side environment variables, validated once at startup.
  * Add new variables here (and to .env.example) as phases introduce them.
@@ -9,7 +13,10 @@ import { z } from "zod";
  */
 const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  // Phase 1: DATABASE_URL: z.url(), DIRECT_URL: z.url().optional(),
+  /** Runtime connection (Neon: the pooled URL). */
+  DATABASE_URL: postgresUrl,
+  /** Migrations only (Neon: the direct URL). Read by prisma.config.ts, optional locally. */
+  DIRECT_URL: postgresUrl.optional(),
   // Phase 2: AUTH_SECRET: z.string().min(32),
 });
 
