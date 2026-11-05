@@ -24,8 +24,8 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Track",
     items: [
       { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, ready: true },
-      { title: "Timer", href: "/timer", icon: Timer, ready: false },
-      { title: "Timeline", href: "/timeline", icon: CalendarClock, ready: false },
+      { title: "Timer", href: "/timer", icon: Timer, ready: true },
+      { title: "Timeline", href: "/timeline", icon: CalendarClock, ready: true },
       { title: "Journal", href: "/journal", icon: NotebookPen, ready: false },
     ],
   },

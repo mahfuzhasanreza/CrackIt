@@ -3,20 +3,11 @@ import { execSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
 
 import { TEST_DATABASE_URL, USERS } from "./fixtures";
+import { logIn } from "./helpers";
 
 /** The form's error alert (Next's route announcer also has role="alert"). */
 const formAlert = (page: Page, text: string | RegExp) =>
   page.getByRole("alert").filter({ hasText: text });
-
-async function logIn(page: Page, email: string, password: string) {
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  // Wait for the Server Action round-trip so repeated attempts can't race each other.
-  await Promise.all([
-    page.waitForResponse((r) => r.request().method() === "POST" && r.url().includes("/login")),
-    page.getByRole("button", { name: "Log in" }).click(),
-  ]);
-}
 
 test("unauthenticated visitors are sent to login", async ({ page }) => {
   await page.goto("/dashboard");

@@ -32,6 +32,13 @@ export const {
   // Vercel (and `next start` behind our own proxy) sets the host headers we rely on.
   trustHost: true,
   session: { strategy: "jwt", maxAge: 30 * 24 * 60 * 60 },
+  logger: {
+    // Failed logins are expected (and recorded in login_attempts); don't log stack traces.
+    error(error) {
+      if (error.name === "CredentialsSignin" || error instanceof CredentialsSignin) return;
+      console.error(error);
+    },
+  },
   pages: { signIn: "/login" },
   providers: [
     Credentials({

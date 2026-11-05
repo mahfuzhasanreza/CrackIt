@@ -32,6 +32,7 @@ model User {
   tracks        Track[]
   topics        Topic[]
   activityTypes ActivityType[]
+  timeEntries   TimeEntry[]
 
   @@map("users")
 }
@@ -49,8 +50,9 @@ model Track {
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topics Topic[]
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics      Topic[]
+  timeEntries TimeEntry[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -79,10 +81,11 @@ model Topic {
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track    Track   @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  parent   Topic?  @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children Topic[] @relation("TopicTree")
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track       Track       @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  parent      Topic?      @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children    Topic[]     @relation("TopicTree")
+  timeEntries TimeEntry[]
 
   // In SQL this index is NULLS NOT DISTINCT so root topics (parent_id NULL) are unique too.
   @@unique([trackId, parentId, name])
@@ -131,8 +134,47 @@ model ActivityType {
   createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  timeEntries TimeEntry[]
 
   @@unique([userId, name])
   @@map("activity_types")
+}
+
+enum TimeEntrySource {
+  TIMER
+  MANUAL
+
+  @@map("time_entry_source")
+}
+
+/// A block of time spent on one activity. ended_at NULL = the running timer.
+/// DB-enforced (raw SQL in the migration): at most one running entry per user, no overlapping
+/// entries per user (GiST exclusion on tstzrange), ended_at > started_at, focus 1-5.
+model TimeEntry {
+  id             String          @id @default(uuid(7)) @db.Uuid
+  userId         String          @map("user_id") @db.Uuid
+  activityTypeId String          @map("activity_type_id") @db.Uuid
+  trackId        String?         @map("track_id") @db.Uuid
+  topicId        String?         @map("topic_id") @db.Uuid
+  startedAt      DateTime        @map("started_at") @db.Timestamptz(3)
+  endedAt        DateTime?       @map("ended_at") @db.Timestamptz(3)
+  source         TimeEntrySource @default(TIMER)
+  note           String?
+  /// 1 (distracted) – 5 (deep focus)
+  focusRating    Int?            @map("focus_rating") @db.SmallInt
+  createdAt      DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime        @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Restrict: archive an activity type instead of deleting one that has history.
+  activityType ActivityType @relation(fields: [activityTypeId], references: [id], onDelete: Restrict)
+  track        Track?       @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  topic        Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+
+  @@index([userId, startedAt])
+  @@index([trackId])
+  @@index([topicId])
+  @@index([activityTypeId])
+  @@map("time_entries")
 }

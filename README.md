@@ -38,6 +38,7 @@ pnpm user:reset-password --email you@example.com                # also signs out
 pnpm check          # lint + typecheck + format check + unit tests
 pnpm build          # production build
 pnpm test:watch     # tests in watch mode
+pnpm test:int       # integration tests against the test DB (needs `pnpm db:up`)
 pnpm build && pnpm test:e2e   # Playwright e2e (uses the test DB on :5434)
 ```
 

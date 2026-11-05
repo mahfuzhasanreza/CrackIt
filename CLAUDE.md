@@ -58,6 +58,7 @@ UI (Server/Client Components)
 | `pnpm format` / `pnpm format:check`                    | Prettier (with Tailwind class sorting)                                 |
 | `pnpm test` / `pnpm test:watch` / `pnpm test:coverage` | Vitest                                                                 |
 | `pnpm check`                                           | lint + typecheck + format:check + test (run before finishing any task) |
+| `pnpm test:int`                                        | Integration tests (`*.int.test.ts`) against the test DB on :5434       |
 
 | `pnpm db:up` / `pnpm db:down` | Start/stop local Postgres (dev :5433, test :5434) via Docker |
 | `pnpm db:migrate` | Create + apply a migration in dev (`-- --name <name>`) |
@@ -85,6 +86,7 @@ UI (Server/Client Components)
 - Config lives in `prisma.config.ts` (CLI URL = `DIRECT_URL ?? DATABASE_URL`, seed command).
   The schema's `datasource` has no `url`.
 - Client is generated to `src/generated/prisma` (git-ignored, regenerated on `postinstall`).
+  `prisma migrate dev` does **not** regenerate it in Prisma 7 — run `pnpm db:generate` after.
   Import types/enums from `@/generated/prisma/client` or `@/generated/prisma/enums`.
 - Runtime client is `db` from `@/lib/db` (uses `@prisma/adapter-pg`). Repositories only.
 - Constraints Prisma can't express (CHECK, `NULLS NOT DISTINCT`, partial/exclusion indexes):
@@ -93,6 +95,31 @@ UI (Server/Client Components)
   `pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`.
 - Default tracks/topics/activity types are data in `src/modules/*/defaults.ts`; seeding logic is
   `prisma/seed-defaults.ts` (idempotent).
+
+## Testing
+
+- Unit (`*.test.ts`): pure logic — validators, date math, summaries. No DB.
+- Integration (`*.int.test.ts`): services against real Postgres (`pnpm db:up` first). Use
+  `createTestUser()` from `test/factories.ts` (fresh user per test, no cleanup needed).
+- E2E (`e2e/*.spec.ts`): Playwright on the prod build. Users in `e2e/fixtures.ts`, reset by
+  `e2e/setup-db.ts`. Radix Selects: use `pick(page, label, option)` from `e2e/helpers.ts`.
+
+## Forms & Server Actions
+
+- Actions in `src/modules/<feature>/actions.ts` take `(prevState, formData)` and return
+  `ActionState` (`src/modules/time-tracking/action-state.ts`); `"use server"` files may only
+  export async functions, so shared constants/types live elsewhere.
+- After a successful mutation call `refresh()` from `next/cache` (nothing is cached yet).
+- Submit with `useNoResetSubmit(action)` (not `<form action>`) when the form must keep input on
+  validation errors — React 19 resets forms after every action, and Radix Selects reset too.
+- Show feedback with `useActionFeedback(state, onSuccess)` (sonner toasts).
+
+## Time tracking rules (enforced in service AND database)
+
+- One running entry per user (partial unique index); no overlaps (GiST exclusion on
+  `tstzrange`); `ended_at > started_at`; entries ≤ 24h; no future times; study needs a track.
+- Day = `[dayStartHour, next dayStartHour)` in the user's timezone — use `src/lib/dates.ts`
+  (`dayWindow`, `logicalDateKey`, `parseLocalDateTime`); never do tz math by hand.
 
 ## Rules
 

@@ -1,6 +1,7 @@
 import "server-only";
 
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { cache } from "react";
 
 import { auth } from "@/auth";
@@ -22,6 +23,9 @@ export type CurrentUser = {
  * Reads cookies → callers must render inside <Suspense>.
  */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  // Auth.js touches crypto before it reads cookies; mark this as request-time work first
+  // so Cache Components never tries to prerender it.
+  await connection();
   const session = await auth();
   const id = session?.user?.id;
   if (!id) return null;
