@@ -112,7 +112,12 @@ UI (Server/Client Components)
 - After a successful mutation call `refresh()` from `next/cache` (nothing is cached yet).
 - Submit with `useNoResetSubmit(action)` (not `<form action>`) when the form must keep input on
   validation errors — React 19 resets forms after every action, and Radix Selects reset too.
-- Show feedback with `useActionFeedback(state, onSuccess)` (sonner toasts).
+- Show feedback with `useActionFeedback(state, onSuccess)` (sonner toasts). If the mutation can
+  unmount the submitting component (a deleted card, an item leaving a list), use
+  `useToastAction(action, onSuccess)` from `src/modules/journal/components/use-toast-action.ts`
+  instead: it toasts when the action returns, not in an effect.
+- Render user markdown with `<Markdown>` from `@/components/markdown` (no raw HTML). 1–5 scales
+  use `<RatingInput>` from `@/components/rating-input`.
 
 ## Time tracking rules (enforced in service AND database)
 
@@ -120,6 +125,13 @@ UI (Server/Client Components)
   `tstzrange`); `ended_at > started_at`; entries ≤ 24h; no future times; study needs a track.
 - Day = `[dayStartHour, next dayStartHour)` in the user's timezone — use `src/lib/dates.ts`
   (`dayWindow`, `logicalDateKey`, `parseLocalDateTime`); never do tz math by hand.
+
+## Journal rules
+
+- One `daily_logs` row per user per logical day (`date` is `@db.Date`; convert with
+  `dateKeyToDb` / `dbDateToKey`). Bedtime ≥ 12:00 is the night before; see `journal/sleep.ts`.
+- Learning entries revise at +1, +3, +7, +14, +30 days (`journal/spaced-repetition.ts`);
+  "forgot" restarts the schedule. Tags are lower-cased per user; unused tags are deleted.
 
 ## Charts & colors
 

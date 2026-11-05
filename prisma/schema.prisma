@@ -29,10 +29,13 @@ model User {
   createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  tracks        Track[]
-  topics        Topic[]
-  activityTypes ActivityType[]
-  timeEntries   TimeEntry[]
+  tracks          Track[]
+  topics          Topic[]
+  activityTypes   ActivityType[]
+  timeEntries     TimeEntry[]
+  dailyLogs       DailyLog[]
+  learningEntries LearningEntry[]
+  tags            Tag[]
 
   @@map("users")
 }
@@ -50,9 +53,10 @@ model Track {
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topics      Topic[]
-  timeEntries TimeEntry[]
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics          Topic[]
+  timeEntries     TimeEntry[]
+  learningEntries LearningEntry[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -81,11 +85,12 @@ model Topic {
   createdAt DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime    @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  track       Track       @relation(fields: [trackId], references: [id], onDelete: Cascade)
-  parent      Topic?      @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
-  children    Topic[]     @relation("TopicTree")
-  timeEntries TimeEntry[]
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track           Track           @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  parent          Topic?          @relation("TopicTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children        Topic[]         @relation("TopicTree")
+  timeEntries     TimeEntry[]
+  learningEntries LearningEntry[]
 
   // In SQL this index is NULLS NOT DISTINCT so root topics (parent_id NULL) are unique too.
   @@unique([trackId, parentId, name])
@@ -177,4 +182,92 @@ model TimeEntry {
   @@index([topicId])
   @@index([activityTypeId])
   @@map("time_entries")
+}
+
+// ─── Journal & learning log ──────────────────────────────────────────────────
+
+/// One journal page per logical day. Ratings are 1–5 (CHECKs in the migration).
+/// bed_at = when the user went to sleep before this day; wake_at = when they woke for it.
+model DailyLog {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  userId       String    @map("user_id") @db.Uuid
+  /// Logical day (see dayStartHour), not a UTC calendar date.
+  date         DateTime  @db.Date
+  mood         Int?      @db.SmallInt
+  energy       Int?      @db.SmallInt
+  sleepQuality Int?      @map("sleep_quality") @db.SmallInt
+  bedAt        DateTime? @map("bed_at") @db.Timestamptz(3)
+  wakeAt       DateTime? @map("wake_at") @db.Timestamptz(3)
+  planForDay   String?   @map("plan_for_day")
+  reflection   String?
+  wins         String?
+  blockers     String?
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("daily_logs")
+}
+
+/// "What I learned": a markdown note, optionally on a track/topic, with spaced-repetition state.
+model LearningEntry {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  /// Logical day it was learned.
+  date           DateTime  @db.Date
+  trackId        String?   @map("track_id") @db.Uuid
+  topicId        String?   @map("topic_id") @db.Uuid
+  title          String
+  contentMd      String    @default("") @map("content_md")
+  sourceUrl      String?   @map("source_url")
+  /// 1 (shaky) – 5 (could teach it)
+  confidence     Int?      @db.SmallInt
+  /// Next logical day to revise. NULL = not scheduled (or finished the schedule).
+  revisitOn      DateTime? @map("revisit_on") @db.Date
+  /// Successful reviews in a row (index into the 1/3/7/14/30-day schedule).
+  reviewStage    Int       @default(0) @map("review_stage") @db.SmallInt
+  lastReviewedAt DateTime? @map("last_reviewed_at") @db.Timestamptz(3)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Notes outlive tracks/topics: removing one just unlinks the note.
+  track Track?             @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  topic Topic?             @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  tags  LearningEntryTag[]
+
+  @@index([userId, date])
+  @@index([userId, revisitOn])
+  @@index([trackId])
+  @@index([topicId])
+  @@map("learning_entries")
+}
+
+/// Generic per-user tag (learning entries now; problems later). Names are stored lower-case.
+model Tag {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  learningEntries LearningEntryTag[]
+
+  @@unique([userId, name])
+  @@map("tags")
+}
+
+model LearningEntryTag {
+  learningEntryId String @map("learning_entry_id") @db.Uuid
+  tagId           String @map("tag_id") @db.Uuid
+
+  learningEntry LearningEntry @relation(fields: [learningEntryId], references: [id], onDelete: Cascade)
+  tag           Tag           @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([learningEntryId, tagId])
+  @@index([tagId])
+  @@map("learning_entry_tags")
 }

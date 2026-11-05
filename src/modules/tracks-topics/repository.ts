@@ -27,3 +27,12 @@ export async function listTrackOptions(userId: string): Promise<TrackOption[]> {
   });
   return tracks.map(({ topics, ...t }) => ({ ...t, topics: buildTopicOptions(topics) }));
 }
+
+/** Ownership checks for references from other modules. */
+export function findOwnedTrack(userId: string, id: string) {
+  return db.track.findFirst({ where: { id, userId }, select: { id: true } });
+}
+
+export function findOwnedTopic(userId: string, id: string) {
+  return db.topic.findFirst({ where: { id, userId }, select: { id: true, trackId: true } });
+}

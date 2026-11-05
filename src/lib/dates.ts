@@ -115,3 +115,14 @@ export function formatHoursCompact(ms: number): string {
   const hours = Math.round((minutes / 60) * 10) / 10;
   return `${Number.isInteger(hours) ? hours : hours.toFixed(1)}h`;
 }
+
+/** A date key as the UTC-midnight `Date` Prisma uses for `@db.Date` columns. */
+export function dateKeyToDb(key: string): Date {
+  const [y, m, d] = parseDateKey(key);
+  return new Date(Date.UTC(y, m, d));
+}
+
+/** Inverse of `dateKeyToDb`: a `@db.Date` value back to "YYYY-MM-DD". */
+export function dbDateToKey(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
