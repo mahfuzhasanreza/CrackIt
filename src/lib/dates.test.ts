@@ -4,6 +4,7 @@ import {
   dateKeyToDb,
   dateKeysBetween,
   dbDateToKey,
+  formatDateKey,
   dayOfWeek,
   dayWindow,
   formatDuration,
@@ -146,5 +147,12 @@ describe("db date round trip", () => {
 
   it("rejects invalid keys", () => {
     expect(() => dateKeyToDb("2026-02-30")).toThrow();
+  });
+});
+
+describe("formatDateKey", () => {
+  it("formats a key without timezone drift", () => {
+    expect(formatDateKey("2026-11-05")).toBe("5 Nov");
+    expect(formatDateKey("2026-12-31", { year: "numeric" })).toBe("31 Dec 2026");
   });
 });

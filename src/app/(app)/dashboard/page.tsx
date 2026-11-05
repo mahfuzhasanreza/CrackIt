@@ -21,6 +21,8 @@ import { StatTiles } from "@/modules/dashboard/components/stat-tiles";
 import { TodayStrip } from "@/modules/dashboard/components/today-strip";
 import { WeekGoals } from "@/modules/dashboard/components/week-goals";
 import { getDashboard, getRevisionDue } from "@/modules/dashboard/service";
+import { ROUND_LABEL } from "@/modules/jobs/labels";
+import { getUpcomingInterviews } from "@/modules/jobs/service";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -36,10 +38,11 @@ export default function DashboardPage() {
 
 async function DashboardContent() {
   const user = await requireUser();
-  const [data, checklist, revision] = await Promise.all([
+  const [data, checklist, revision, interviews] = await Promise.all([
     getDashboard(user),
     getTodayChecklist(user),
     getRevisionDue(user),
+    getUpcomingInterviews(user.id),
   ]);
   const today = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
@@ -112,35 +115,87 @@ async function DashboardContent() {
             <TodayChecklist habits={checklist.habits} due={checklist.due} />
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              <h2>Due for revision</h2>
-            </CardTitle>
-            <CardDescription>Spaced repetition: 1, 3, 7, 14, 30 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="flex flex-col divide-y text-sm">
-              {[
-                { label: "Learning notes", count: revision.notes, href: "/journal/learning?due=1" },
-                { label: "Problems", count: revision.problems, href: "/problems" },
-                { label: "Viva questions", count: revision.viva, href: "/lecturer?tab=viva" },
-              ].map((r) => (
-                <li
-                  key={r.label}
-                  className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
-                >
-                  <Link href={r.href} className="font-medium hover:underline">
-                    {r.label}
+        <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Due for revision</h2>
+              </CardTitle>
+              <CardDescription>Spaced repetition: 1, 3, 7, 14, 30 days</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ul className="flex flex-col divide-y text-sm">
+                {[
+                  {
+                    label: "Learning notes",
+                    count: revision.notes,
+                    href: "/journal/learning?due=1",
+                  },
+                  { label: "Problems", count: revision.problems, href: "/problems" },
+                  { label: "Viva questions", count: revision.viva, href: "/lecturer?tab=viva" },
+                ].map((r) => (
+                  <li
+                    key={r.label}
+                    className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+                  >
+                    <Link href={r.href} className="font-medium hover:underline">
+                      {r.label}
+                    </Link>
+                    <span className="text-muted-foreground tabular-nums">
+                      {r.count === 0 ? "None due" : `${r.count} due`}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Upcoming interviews</h2>
+              </CardTitle>
+              <CardDescription>Next 14 days</CardDescription>
+              <CardAction>
+                <Button asChild variant="ghost" size="sm">
+                  <Link href="/interviews">
+                    All <ArrowRight />
                   </Link>
-                  <span className="text-muted-foreground tabular-nums">
-                    {r.count === 0 ? "None due" : `${r.count} due`}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+                </Button>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              {interviews.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Nothing scheduled.</p>
+              ) : (
+                <ul className="flex flex-col divide-y text-sm">
+                  {interviews.map((i) => (
+                    <li key={i.id} className="flex flex-col gap-0.5 py-2.5 first:pt-0 last:pb-0">
+                      <Link
+                        href={`/applications/${i.application.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {i.application.organization.name} · {ROUND_LABEL[i.round]}
+                      </Link>
+                      <time
+                        className="text-muted-foreground"
+                        dateTime={i.scheduledAt.toISOString()}
+                      >
+                        {new Intl.DateTimeFormat("en-GB", {
+                          weekday: "short",
+                          day: "numeric",
+                          month: "short",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          timeZone: user.timezone,
+                        }).format(i.scheduledAt)}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">

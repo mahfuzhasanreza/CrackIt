@@ -126,3 +126,14 @@ export function dateKeyToDb(key: string): Date {
 export function dbDateToKey(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
+
+/** A date key as a short label, e.g. "5 Nov" (or with `{ year: "numeric" }`). Server- and client-safe. */
+export function formatDateKey(key: string, opts: Intl.DateTimeFormatOptions = {}): string {
+  const [y, m, d] = parseDateKey(key);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+    ...opts,
+  }).format(new Date(Date.UTC(y, m, d)));
+}
