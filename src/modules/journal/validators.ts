@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { isValidDateKey } from "@/lib/dates";
 
-import { parseTags } from "./tags";
+import { parseTags } from "@/lib/tags";
 
 /** FormData sends "" for empty fields; treat that as "not provided". */
 const optional = <T extends z.ZodType>(schema: T) =>

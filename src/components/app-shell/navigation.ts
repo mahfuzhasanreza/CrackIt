@@ -4,6 +4,7 @@ import {
   CalendarClock,
   ChartColumn,
   Code,
+  FolderGit2,
   GraduationCap,
   LayoutDashboard,
   ListChecks,
@@ -34,7 +35,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { title: "Topics", href: "/topics", icon: ListTree, ready: true },
       { title: "Checklists", href: "/checklists", icon: ListChecks, ready: true },
-      { title: "Problems", href: "/problems", icon: Code, ready: false },
+      { title: "Problems", href: "/problems", icon: Code, ready: true },
+      { title: "Projects", href: "/projects", icon: FolderGit2, ready: true },
       { title: "Lecturer", href: "/lecturer", icon: GraduationCap, ready: false },
       { title: "Resources", href: "/resources", icon: BookOpen, ready: false },
     ],

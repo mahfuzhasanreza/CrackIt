@@ -15,6 +15,7 @@ export const USERS = {
     password: "checklists-password-1234",
     name: "Checklists User",
   },
+  swe: { email: "e2e-swe@crackit.local", password: "swe-password-1234", name: "SWE User" },
   journal: {
     email: "e2e-journal@crackit.local",
     password: "journal-password-1234",

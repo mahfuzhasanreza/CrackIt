@@ -16,8 +16,11 @@ async function main() {
     await prisma.timeEntry.deleteMany({ where: testUsers });
     await prisma.dailyLog.deleteMany({ where: testUsers });
     await prisma.learningEntry.deleteMany({ where: testUsers });
-    await prisma.tag.deleteMany({ where: testUsers });
+
     await prisma.checklist.deleteMany({ where: testUsers });
+    await prisma.problem.deleteMany({ where: testUsers });
+    await prisma.project.deleteMany({ where: testUsers });
+    await prisma.tag.deleteMany({ where: testUsers });
     // Topics are re-seeded below, so edits from earlier runs are reset.
     await prisma.topic.deleteMany({ where: testUsers });
     for (const u of Object.values(USERS)) {

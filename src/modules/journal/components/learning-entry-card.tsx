@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 
 import type { TrackOption } from "../../tracks-topics/repository";
 import type { LearningEntryView } from "../service";
-import { isDue, REVIEW_INTERVALS_DAYS } from "../spaced-repetition";
+import { isDue, REVIEW_INTERVALS_DAYS } from "@/lib/spaced-repetition";
 
 import { LearningEntryButton } from "./learning-entry-dialog";
 import { ReviewButtons } from "./review-buttons";

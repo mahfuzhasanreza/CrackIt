@@ -20,7 +20,7 @@ import { Last7Chart } from "@/modules/dashboard/components/last7-chart";
 import { StatTiles } from "@/modules/dashboard/components/stat-tiles";
 import { TodayStrip } from "@/modules/dashboard/components/today-strip";
 import { WeekGoals } from "@/modules/dashboard/components/week-goals";
-import { getDashboard } from "@/modules/dashboard/service";
+import { getDashboard, getRevisionDue } from "@/modules/dashboard/service";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -36,7 +36,11 @@ export default function DashboardPage() {
 
 async function DashboardContent() {
   const user = await requireUser();
-  const [data, checklist] = await Promise.all([getDashboard(user), getTodayChecklist(user)]);
+  const [data, checklist, revision] = await Promise.all([
+    getDashboard(user),
+    getTodayChecklist(user),
+    getRevisionDue(user),
+  ]);
   const today = new Intl.DateTimeFormat("en-GB", {
     weekday: "long",
     day: "numeric",
@@ -89,24 +93,54 @@ async function DashboardContent() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h2>Today&apos;s checklist</h2>
-          </CardTitle>
-          <CardDescription>Habits and anything due. Tick them off here.</CardDescription>
-          <CardAction>
-            <Button asChild variant="ghost" size="sm">
-              <Link href="/checklists">
-                Checklists <ArrowRight />
-              </Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <TodayChecklist habits={checklist.habits} due={checklist.due} />
-        </CardContent>
-      </Card>
+      <div className="grid items-start gap-6 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle>
+              <h2>Today&apos;s checklist</h2>
+            </CardTitle>
+            <CardDescription>Habits and anything due. Tick them off here.</CardDescription>
+            <CardAction>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/checklists">
+                  Checklists <ArrowRight />
+                </Link>
+              </Button>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <TodayChecklist habits={checklist.habits} due={checklist.due} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <h2>Due for revision</h2>
+            </CardTitle>
+            <CardDescription>Spaced repetition: 1, 3, 7, 14, 30 days</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul className="flex flex-col divide-y text-sm">
+              {[
+                { label: "Learning notes", count: revision.notes, href: "/journal/learning?due=1" },
+                { label: "Problems", count: revision.problems, href: "/problems" },
+              ].map((r) => (
+                <li
+                  key={r.label}
+                  className="flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
+                >
+                  <Link href={r.href} className="font-medium hover:underline">
+                    {r.label}
+                  </Link>
+                  <span className="text-muted-foreground tabular-nums">
+                    {r.count === 0 ? "None due" : `${r.count} due`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

@@ -3,7 +3,16 @@ import { expect, test } from "@playwright/test";
 import { USERS } from "./fixtures";
 import { logInAs } from "./helpers";
 
-const PAGES = ["/dashboard", "/timer", "/timeline", "/journal", "/topics", "/checklists"];
+const PAGES = [
+  "/dashboard",
+  "/timer",
+  "/timeline",
+  "/journal",
+  "/topics",
+  "/checklists",
+  "/problems",
+  "/projects",
+];
 
 test("sidebar stays put and the header matches it on every page", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 700 });

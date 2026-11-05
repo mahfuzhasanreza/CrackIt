@@ -39,6 +39,8 @@ model User {
   checklists               Checklist[]
   checklistItems           ChecklistItem[]
   checklistItemCompletions ChecklistItemCompletion[]
+  problems                 Problem[]
+  projects                 Project[]
 
   @@map("users")
 }
@@ -95,6 +97,7 @@ model Topic {
   children        Topic[]         @relation("TopicTree")
   timeEntries     TimeEntry[]
   learningEntries LearningEntry[]
+  problems        Problem[]
 
   // In SQL this index is NULLS NOT DISTINCT so root topics (parent_id NULL) are unique too.
   @@unique([trackId, parentId, name])
@@ -249,7 +252,7 @@ model LearningEntry {
   @@map("learning_entries")
 }
 
-/// Generic per-user tag (learning entries now; problems later). Names are stored lower-case.
+/// Generic per-user tag (learning entries, problem patterns). Names are stored lower-case.
 model Tag {
   id        String   @id @default(uuid(7)) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
@@ -259,6 +262,7 @@ model Tag {
 
   user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   learningEntries LearningEntryTag[]
+  problems        ProblemTag[]
 
   @@unique([userId, name])
   @@map("tags")
@@ -354,4 +358,109 @@ model ChecklistItemCompletion {
   @@id([itemId, period])
   @@index([userId, period])
   @@map("checklist_item_completions")
+}
+
+// ─── SWE prep: problems & projects ───────────────────────────────────────────
+
+enum ProblemPlatform {
+  LEETCODE
+  CODEFORCES
+  HACKERRANK
+  ATCODER
+  GEEKSFORGEEKS
+  CODECHEF
+  OTHER
+
+  @@map("problem_platform")
+}
+
+enum ProblemDifficulty {
+  EASY
+  MEDIUM
+  HARD
+
+  @@map("problem_difficulty")
+}
+
+enum ProblemStatus {
+  TODO
+  ATTEMPTED
+  SOLVED
+  NEEDS_REVISION
+
+  @@map("problem_status")
+}
+
+/// A DSA problem. Patterns are tags. Solved problems follow the same 1/3/7/14/30-day revision
+/// schedule as learning notes (next_review_on / review_stage).
+model Problem {
+  id             String            @id @default(uuid(7)) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  topicId        String?           @map("topic_id") @db.Uuid
+  title          String
+  platform       ProblemPlatform   @default(LEETCODE)
+  url            String?
+  difficulty     ProblemDifficulty @default(MEDIUM)
+  status         ProblemStatus     @default(TODO)
+  attempts       Int               @default(0)
+  timeSpentMin   Int               @default(0) @map("time_spent_min")
+  solvedAt       DateTime?         @map("solved_at") @db.Timestamptz(3)
+  notesMd        String            @default("") @map("notes_md")
+  nextReviewOn   DateTime?         @map("next_review_on") @db.Date
+  reviewStage    Int               @default(0) @map("review_stage") @db.SmallInt
+  lastReviewedAt DateTime?         @map("last_reviewed_at") @db.Timestamptz(3)
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic Topic?       @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  tags  ProblemTag[]
+
+  @@index([userId, status])
+  @@index([userId, nextReviewOn])
+  @@index([topicId])
+  @@map("problems")
+}
+
+model ProblemTag {
+  problemId String @map("problem_id") @db.Uuid
+  tagId     String @map("tag_id") @db.Uuid
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([problemId, tagId])
+  @@index([tagId])
+  @@map("problem_tags")
+}
+
+enum ProjectStatus {
+  PLANNING
+  BUILDING
+  SHIPPED
+  PAUSED
+
+  @@map("project_status")
+}
+
+/// Portfolio project to talk about in interviews.
+model Project {
+  id          String        @id @default(uuid(7)) @db.Uuid
+  userId      String        @map("user_id") @db.Uuid
+  name        String
+  description String?
+  repoUrl     String?       @map("repo_url")
+  liveUrl     String?       @map("live_url")
+  /// Technologies, as entered (e.g. ["Next.js", "PostgreSQL"]).
+  stack       String[]      @default([])
+  status      ProjectStatus @default(BUILDING)
+  notesMd     String        @default("") @map("notes_md")
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime      @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, sortOrder])
+  @@map("projects")
 }
