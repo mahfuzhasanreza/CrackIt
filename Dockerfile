@@ -23,6 +23,8 @@ FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/src/generated ./src/generated
 COPY . .
+# public/ is optional and git doesn't keep empty folders, but the runtime stage copies it.
+RUN mkdir -p public
 # Build-time placeholders so env validation passes; real values are injected at runtime.
 ENV NEXT_OUTPUT=standalone \
     DATABASE_URL=postgresql://build:build@localhost:5432/build \
