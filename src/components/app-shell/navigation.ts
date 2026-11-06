@@ -52,7 +52,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Review",
     items: [
       { title: "Analytics", href: "/analytics", icon: ChartColumn, ready: true },
-      { title: "Settings", href: "/settings", icon: Settings, ready: false },
+      { title: "Settings", href: "/settings", icon: Settings, ready: true },
     ],
   },
 ];

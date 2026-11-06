@@ -6,6 +6,14 @@ Personal tracker for cracking interviews — software engineer / full-stack and 
 lecturer prep. Tracks time (study, gaps, sleep, other), what was learned, checklists, problems,
 applications and interviews.
 
+- **Install it on your phone:** open the site in Chrome (Android) → menu → _Install app_, or in
+  Safari (iOS) → Share → _Add to Home Screen_. It opens full-screen like a native app.
+- **Keyboard:** press <kbd>?</kbd> anywhere for shortcuts (<kbd>g</kbd> then a letter to jump to
+  a page, <kbd>s</kbd> to stop the timer).
+- **Your data:** Settings → Data downloads a full JSON backup (restorable into any CrackIt
+  account, e.g. moving from local to production) and CSVs of time entries, problems and
+  applications.
+
 - Product & architecture plan: [`PLAN.md`](./PLAN.md)
 - Conventions for contributors / Claude Code: [`CLAUDE.md`](./CLAUDE.md)
 

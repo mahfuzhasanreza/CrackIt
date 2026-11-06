@@ -27,6 +27,16 @@ export const USERS = {
     password: "analytics-password-1234",
     name: "Analytics User",
   },
+  settings: {
+    email: "e2e-settings@crackit.local",
+    password: "settings-password-1234",
+    name: "Settings User",
+  },
+  password: {
+    email: "e2e-password@crackit.local",
+    password: "password-password-1234",
+    name: "Password User",
+  },
   resources: {
     email: "e2e-resources@crackit.local",
     password: "resources-password-1234",
