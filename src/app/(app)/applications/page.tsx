@@ -86,9 +86,9 @@ function BoardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <Skeleton className="h-14 w-full max-w-72" />
-      <div className="flex gap-3 overflow-hidden">
-        {Array.from({ length: 5 }, (_, i) => (
-          <Skeleton key={i} className="h-96 w-64 shrink-0" />
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] gap-3">
+        {Array.from({ length: 4 }, (_, i) => (
+          <Skeleton key={i} className="h-96" />
         ))}
       </div>
     </div>
