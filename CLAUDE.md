@@ -9,7 +9,7 @@ architecture plan is in `PLAN.md`; implement it phase by phase (section 11).
 
 - Next.js 16 (App Router, Turbopack, `cacheComponents` + `partialPrefetching` on), React 19, TypeScript strict
 - PostgreSQL 16 + Prisma 7 (local DB via Docker Compose on port 5433; prod on Neon)
-- Auth.js v5 Credentials (email + password, JWT sessions, no public sign-up)
+- Auth.js v5 Credentials (email + password, JWT sessions, open sign-up at /register)
 - Tailwind CSS v4 + shadcn/ui (Radix, `new-york`), lucide icons, sonner toasts, next-themes
 - Zod v4 for all validation; Vitest + Testing Library; Playwright for e2e
 - pnpm; hosted on Vercel; CI on GitHub Actions
@@ -72,6 +72,9 @@ UI (Server/Client Components)
 ## Auth
 
 - Auth.js v5 Credentials, JWT sessions (`src/auth.ts`); logic in `src/modules/auth/`.
+- Open sign-up at `/register` (`auth/registration.ts`): 5 attempts per IP per hour
+  (`signup_attempts`), new users get the starter tracks/topics/activities, then are signed in.
+  `pnpm user:create` still works for scripted accounts.
 - `src/proxy.ts` only does optimistic redirects (signed JWT present). `/login` is always
   reachable so a stale JWT can't cause a redirect loop.
 - Authoritative check = DAL: `getCurrentUser()` / `requireUser()` from `@/modules/auth/dal`
@@ -191,7 +194,9 @@ UI (Server/Client Components)
 
 ## Settings, backup, PWA & shortcuts
 
-- `/settings?tab=general|tracks|activities|data`. Password change verifies the current one and
+- `/settings?tab=general|tracks|activities|data`. A new track can include its topics as an
+  indented outline (`tracks-topics/outline.ts`: one per line, ≤ 4 levels, unique siblings), or
+  start from a starter template; existing tracks' topics are edited on `/topics`. Password change verifies the current one and
   bumps `sessionVersion` (signs out everywhere), then redirects to `/login?password=changed`.
   Activity types with time entries can't be deleted — archive them. Track/activity colors come
   from the chart palette (`ColorChoice`).

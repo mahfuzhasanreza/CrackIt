@@ -293,7 +293,7 @@ Vercel builds and runs the app itself, so Docker's job here is **local developme
 ## 10. Security & Quality
 
 - **Email + password auth**: Auth.js Credentials provider (requires `session: { strategy: "jwt" }`); passwords hashed with argon2id (or bcryptjs, cost 12); constant-time comparison and a generic "invalid email or password" error.
-- **No public sign-up**: your account is created with `pnpm user:create` (script prompts for password); `pnpm user:reset-password` for resets. Optional later: "change password" page in Settings.
+- **Sign-up**: originally CLI-only (`pnpm user:create`); open registration at `/register` was added later (rate-limited per IP; new accounts get the starter tracks). `pnpm user:reset-password` for resets; password change lives in Settings.
 - Login rate limit + lockout via `login_attempts`; strong `AUTH_SECRET`; secure, httpOnly cookies (default in Auth.js).
 - All routes under `(app)` protected by `proxy.ts`; every action re-checks `auth()` → Zod parse → service; ownership check by `user_id`.
 - Security headers (CSP, X-Frame-Options, Referrer-Policy) in `next.config.ts`; HTTPS/HSTS handled by Vercel.

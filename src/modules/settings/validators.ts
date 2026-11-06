@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { newPasswordSchema } from "../auth/validators";
+import { OutlineError, parseOutline } from "../tracks-topics/outline";
 
 const optional = <T extends z.ZodType>(schema: T) =>
   z.preprocess(
@@ -55,6 +56,20 @@ export const trackSchema = z.object({
       .max(168, "A week has 168h"),
   ),
   isActive: checkbox,
+  /** New tracks only: an indented outline, one topic per line (see tracks-topics/outline.ts). */
+  topics: z
+    .string()
+    .max(30_000, "That's a very long outline")
+    .default("")
+    .transform((text, ctx) => {
+      try {
+        return parseOutline(text);
+      } catch (e) {
+        if (!(e instanceof OutlineError)) throw e;
+        ctx.addIssue({ code: "custom", message: e.message });
+        return z.NEVER;
+      }
+    }),
 });
 export type TrackInput = z.infer<typeof trackSchema>;
 

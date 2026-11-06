@@ -5,7 +5,8 @@ import { AuthError, CredentialsSignin } from "next-auth";
 
 import { signIn, signOut } from "@/auth";
 
-import { loginSchema, safeRedirectPath } from "./validators";
+import { registerUser } from "./registration";
+import { loginSchema, registerSchema, safeRedirectPath } from "./validators";
 
 export type LoginState = {
   error?: string;
@@ -36,6 +37,46 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     }
     throw error; // includes the redirect thrown by a successful signIn
   }
+}
+
+export type RegisterState = {
+  error?: string;
+  fieldErrors?: Partial<Record<"name" | "email" | "password" | "confirmPassword", string[]>>;
+  values?: { name: string; email: string };
+};
+
+/** Open sign-up: create the account, then sign straight in. */
+export async function registerAction(
+  _prev: RegisterState,
+  formData: FormData,
+): Promise<RegisterState> {
+  const values = {
+    name: String(formData.get("name") ?? ""),
+    email: String(formData.get("email") ?? ""),
+  };
+  const parsed = registerSchema.safeParse({
+    ...values,
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+  });
+  if (!parsed.success) return { fieldErrors: parsed.error.flatten().fieldErrors, values };
+
+  const result = await registerUser(parsed.data, await requestIp());
+  if (!result.ok) {
+    return { error: result.error.message, fieldErrors: result.error.fieldErrors, values };
+  }
+  // Throws the redirect to the dashboard.
+  await signIn("credentials", {
+    email: parsed.data.email,
+    password: parsed.data.password,
+    redirectTo: "/dashboard",
+  });
+  return {};
+}
+
+async function requestIp() {
+  const h = await headers();
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() || h.get("x-real-ip") || null;
 }
 
 async function requestOrigin() {

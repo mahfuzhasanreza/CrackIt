@@ -60,9 +60,10 @@ export const {
      * Runs in proxy.ts: optimistic check only (JWT present and signed). /login is always
      * reachable — it must be, because a signed JWT can still be stale (e.g. after a password
      * reset), and only the DAL can tell. The login page itself redirects valid sessions away.
+     * /register (open sign-up) is public too.
      */
     authorized({ auth, request: { nextUrl } }) {
-      if (nextUrl.pathname === "/login") return true;
+      if (nextUrl.pathname === "/login" || nextUrl.pathname === "/register") return true;
       return Boolean(auth?.user); // false → redirect to /login?callbackUrl=...
     },
     jwt({ token, user }) {

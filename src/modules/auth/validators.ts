@@ -34,3 +34,19 @@ export function safeRedirectPath(value: unknown, origin: string, fallback = "/da
   if (url.pathname === "/login" || url.pathname.startsWith("/api/")) return fallback;
   return `${url.pathname}${url.search}${url.hash}`;
 }
+
+export const registerSchema = z
+  .object({
+    name: z.preprocess(
+      (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
+      z.string().trim().max(80, "Keep it under 80 characters").optional(),
+    ),
+    email: emailSchema,
+    password: newPasswordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((r) => r.password === r.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Doesn't match",
+  });
+export type RegisterInput = z.infer<typeof registerSchema>;

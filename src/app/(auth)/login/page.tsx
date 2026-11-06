@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
@@ -24,11 +25,20 @@ export default function LoginPage() {
           </CardTitle>
           <CardDescription>Welcome back. Keep the streak going.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-4">
           {/* useSearchParams reads the request → needs a Suspense boundary */}
           <Suspense fallback={<Skeleton className="h-52 w-full" />}>
             <LoginForm />
           </Suspense>
+          <p className="text-center text-sm text-muted-foreground">
+            New here?{" "}
+            <Link
+              href="/register"
+              className="font-medium text-foreground underline underline-offset-2"
+            >
+              Create an account
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </main>
