@@ -9,7 +9,7 @@ export const GO_TO: { key: string; href: string; label: string }[] = [
   { key: "c", href: "/checklists", label: "Checklists" },
   { key: "p", href: "/problems", label: "Problems" },
   { key: "k", href: "/projects", label: "Projects" },
-  { key: "u", href: "/lecturer", label: "Lecturer" },
+  { key: "e", href: "/practice", label: "Practice" },
   { key: "r", href: "/resources", label: "Resources" },
   { key: "a", href: "/applications", label: "Applications" },
   { key: "i", href: "/interviews", label: "Interviews" },

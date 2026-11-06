@@ -35,7 +35,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    return [{ source: "/", destination: "/dashboard", permanent: false }];
+    return [
+      { source: "/", destination: "/dashboard", permanent: false },
+      // The lecturer page became the track-agnostic Practice page.
+      { source: "/lecturer", destination: "/practice", permanent: true },
+    ];
   },
 };
 

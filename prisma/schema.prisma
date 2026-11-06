@@ -41,10 +41,8 @@ model User {
   checklistItemCompletions ChecklistItemCompletion[]
   problems                 Problem[]
   projects                 Project[]
-  courses                  Course[]
-  teachingDemos            TeachingDemo[]
-  publications             Publication[]
-  vivaQuestions            VivaQuestion[]
+  practiceQuestions        PracticeQuestion[]
+  presentations            Presentation[]
   organizations            Organization[]
   applications             Application[]
   applicationEvents        ApplicationEvent[]
@@ -69,15 +67,17 @@ model Track {
   createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  topics          Topic[]
-  timeEntries     TimeEntry[]
-  learningEntries LearningEntry[]
-  checklists      Checklist[]
-  applications    Application[]
-  mockInterviews  MockInterview[]
-  resources       Resource[]
-  goals           Goal[]
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topics            Topic[]
+  timeEntries       TimeEntry[]
+  learningEntries   LearningEntry[]
+  checklists        Checklist[]
+  applications      Application[]
+  mockInterviews    MockInterview[]
+  resources         Resource[]
+  goals             Goal[]
+  practiceQuestions PracticeQuestion[]
+  presentations     Presentation[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -492,98 +492,14 @@ model Project {
   @@map("projects")
 }
 
-// ─── Lecturer prep ───────────────────────────────────────────────────────────
+// ─── Practice: question bank & presentations ─────────────────────────────────
 
-/// A subject you may be asked to teach.
-model Course {
-  id          String   @id @default(uuid(7)) @db.Uuid
-  userId      String   @map("user_id") @db.Uuid
-  name        String
-  code        String?
-  syllabusUrl String?  @map("syllabus_url")
-  /// 1 (not ready) – 5 (could teach it tomorrow)
-  readiness   Int      @default(1) @db.SmallInt
-  notesMd     String   @default("") @map("notes_md")
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teachingDemos TeachingDemo[]
-  vivaQuestions VivaQuestion[]
-
-  @@unique([userId, name])
-  @@map("courses")
-}
-
-enum DemoAudience {
-  SELF
-  RECORDED
-  MOCK_PANEL
-  LIVE_CLASS
-
-  @@map("demo_audience")
-}
-
-/// A practice (or real) teaching demo.
-model TeachingDemo {
-  id           String       @id @default(uuid(7)) @db.Uuid
-  userId       String       @map("user_id") @db.Uuid
-  courseId     String?      @map("course_id") @db.Uuid
-  topic        String
-  /// Logical day it was given.
-  date         DateTime     @db.Date
-  durationMin  Int          @map("duration_min")
-  audience     DemoAudience @default(SELF)
-  /// 1–5
-  selfScore    Int?         @map("self_score") @db.SmallInt
-  feedbackMd   String       @default("") @map("feedback_md")
-  recordingUrl String?      @map("recording_url")
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime     @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
-
-  @@index([userId, date])
-  @@index([courseId])
-  @@map("teaching_demos")
-}
-
-enum PublicationStatus {
-  IDEA
-  WRITING
-  SUBMITTED
-  ACCEPTED
-  PUBLISHED
-  REJECTED
-
-  @@map("publication_status")
-}
-
-/// A paper. Submitted or later requires submitted_on (CHECK in the migration).
-model Publication {
-  id          String            @id @default(uuid(7)) @db.Uuid
-  userId      String            @map("user_id") @db.Uuid
-  title       String
-  venue       String?
-  status      PublicationStatus @default(IDEA)
-  submittedOn DateTime?         @map("submitted_on") @db.Date
-  url         String?
-  notesMd     String            @default("") @map("notes_md")
-  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, status])
-  @@map("publications")
-}
-
-/// Viva / board question with a model answer, practised on the spaced-repetition schedule.
-model VivaQuestion {
+/// A question with a model answer, practised on the spaced-repetition schedule (any track:
+/// viva questions, behavioural answers, concepts, definitions...).
+model PracticeQuestion {
   id              String    @id @default(uuid(7)) @db.Uuid
   userId          String    @map("user_id") @db.Uuid
-  courseId        String?   @map("course_id") @db.Uuid
+  trackId         String?   @map("track_id") @db.Uuid
   question        String
   answerMd        String    @default("") @map("answer_md")
   nextReviewOn    DateTime? @map("next_review_on") @db.Date
@@ -592,12 +508,46 @@ model VivaQuestion {
   createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  course Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: SetNull)
 
   @@index([userId, nextReviewOn])
-  @@index([courseId])
-  @@map("viva_questions")
+  @@index([trackId])
+  @@map("practice_questions")
+}
+
+enum PresentationAudience {
+  SELF
+  RECORDED
+  MOCK_PANEL
+  LIVE
+
+  @@map("presentation_audience")
+}
+
+/// A practice (or real) talk, demo or presentation, with a self-score and feedback.
+model Presentation {
+  id           String               @id @default(uuid(7)) @db.Uuid
+  userId       String               @map("user_id") @db.Uuid
+  trackId      String?              @map("track_id") @db.Uuid
+  title        String
+  /// Logical day it was given.
+  date         DateTime             @db.Date
+  durationMin  Int                  @map("duration_min")
+  audience     PresentationAudience @default(SELF)
+  /// 1–5
+  selfScore    Int?                 @map("self_score") @db.SmallInt
+  feedbackMd   String               @default("") @map("feedback_md")
+  recordingUrl String?              @map("recording_url")
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime             @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([trackId])
+  @@map("presentations")
 }
 
 // ─── Job hunt ────────────────────────────────────────────────────────────────

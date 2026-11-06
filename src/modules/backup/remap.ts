@@ -29,9 +29,42 @@ export const backupSchema = z.object({
     .strict(),
 });
 
+type Json = Record<string, unknown>;
+const isObject = (v: unknown): v is Json =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+
+/**
+ * Version 1 had lecturer-only tables. Courses and publications are dropped; viva questions and
+ * teaching demos become track-less practice questions and presentations.
+ */
+export function upgradeBackup(json: unknown): unknown {
+  if (!isObject(json) || json.version !== 1 || !isObject(json.tables)) return json;
+  const rows = (v: unknown) => (Array.isArray(v) ? v.filter(isObject) : []);
+  const without = (row: Json, ...keys: string[]) =>
+    Object.fromEntries(Object.entries(row).filter(([k]) => !keys.includes(k)));
+  const tables = without(json.tables, "courses", "publications", "vivaQuestions", "teachingDemos");
+  return {
+    ...json,
+    version: 2,
+    tables: {
+      ...tables,
+      practiceQuestions: rows(json.tables.vivaQuestions).map((q) => ({
+        ...without(q, "courseId"),
+        trackId: null,
+      })),
+      presentations: rows(json.tables.teachingDemos).map((d) => ({
+        ...without(d, "courseId", "topic", "audience"),
+        title: d.topic,
+        audience: d.audience === "LIVE_CLASS" ? "LIVE" : d.audience,
+        trackId: null,
+      })),
+    },
+  };
+}
+
 /** Parse an uploaded file's JSON. Throws `BackupError` with a readable message. */
 export function parseBackup(json: unknown): Backup {
-  const parsed = backupSchema.safeParse(json);
+  const parsed = backupSchema.safeParse(upgradeBackup(json));
   if (!parsed.success) {
     const issue = parsed.error.issues[0]!;
     const where = issue.path.length ? ` (at ${issue.path.join(".")})` : "";

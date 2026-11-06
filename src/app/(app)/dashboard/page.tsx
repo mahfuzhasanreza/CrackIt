@@ -135,7 +135,7 @@ async function DashboardContent() {
                     href: "/journal/learning?due=1",
                   },
                   { label: "Problems", count: revision.problems, href: "/problems" },
-                  { label: "Viva questions", count: revision.viva, href: "/lecturer?tab=viva" },
+                  { label: "Practice questions", count: revision.questions, href: "/practice" },
                 ].map((r) => (
                   <li
                     key={r.label}

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { csvCell, toCsv } from "./csv";
-import { BackupError, countRows, parseBackup, remapBackup } from "./remap";
+import { BackupError, countRows, parseBackup, remapBackup, upgradeBackup } from "./remap";
 import { MODEL_TABLE, TABLES, type Tables } from "./spec";
 
 const id = (n: number) => `00000000-0000-7000-8000-${String(n).padStart(12, "0")}`;
@@ -58,7 +58,7 @@ describe("backup remap", () => {
   it("parses the envelope with readable errors", () => {
     const base = {
       app: "crackit",
-      version: 1,
+      version: 2,
       exportedAt: "2026-11-08T00:00:00Z",
       profile: { name: null, timezone: "Asia/Dhaka", dayStartHour: 4 },
       tables: { tracks: [{ id: id(1) }] },
@@ -66,8 +66,40 @@ describe("backup remap", () => {
     const b = parseBackup(base);
     expect(countRows(b.tables)).toMatchObject({ tracks: 1, goals: 0 });
     expect(() => parseBackup({ ...base, app: "other" })).toThrow("This isn't a CrackIt backup.");
-    expect(() => parseBackup({ ...base, version: 2 })).toThrow(/another CrackIt version/);
+    expect(() => parseBackup({ ...base, version: 3 })).toThrow(/another CrackIt version/);
     expect(() => parseBackup({ ...base, tables: { users: [] } })).toThrow(BackupError);
+  });
+});
+
+describe("backup versions", () => {
+  it("upgrades a version 1 backup: lecturer tables become practice tables", () => {
+    const v1 = {
+      app: "crackit",
+      version: 1,
+      exportedAt: "2026-11-01T00:00:00Z",
+      profile: { name: null, timezone: "Asia/Dhaka", dayStartHour: 4 },
+      tables: {
+        tracks: [{ id: id(1), name: "SWE" }],
+        courses: [{ id: id(2), name: "DS" }],
+        publications: [{ id: id(3), title: "Paper" }],
+        vivaQuestions: [{ id: id(4), courseId: id(2), question: "Q?" }],
+        teachingDemos: [{ id: id(5), courseId: id(2), topic: "Stacks", audience: "LIVE_CLASS" }],
+      },
+    };
+    const b = parseBackup(v1);
+    expect(b.version).toBe(2);
+    expect(b.tables.practiceQuestions).toEqual([{ id: id(4), question: "Q?", trackId: null }]);
+    expect(b.tables.presentations).toEqual([
+      { id: id(5), title: "Stacks", audience: "LIVE", trackId: null },
+    ]);
+    expect(b.tables).not.toHaveProperty("courses");
+    // Remapping works on the upgraded tables (no dangling course ids).
+    expect(() => remapBackup(b.tables, "me", newId)).not.toThrow();
+  });
+
+  it("leaves current backups alone", () => {
+    const v2 = { app: "crackit", version: 2, tables: {} };
+    expect(upgradeBackup(v2)).toBe(v2);
   });
 });
 

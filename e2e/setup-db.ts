@@ -23,10 +23,8 @@ async function main() {
     await prisma.checklist.deleteMany({ where: testUsers });
     await prisma.problem.deleteMany({ where: testUsers });
     await prisma.project.deleteMany({ where: testUsers });
-    await prisma.vivaQuestion.deleteMany({ where: testUsers });
-    await prisma.teachingDemo.deleteMany({ where: testUsers });
-    await prisma.publication.deleteMany({ where: testUsers });
-    await prisma.course.deleteMany({ where: testUsers });
+    await prisma.practiceQuestion.deleteMany({ where: testUsers });
+    await prisma.presentation.deleteMany({ where: testUsers });
     await prisma.mockInterview.deleteMany({ where: testUsers });
     await prisma.organization.deleteMany({ where: testUsers }); // cascades applications
     await prisma.resource.deleteMany({ where: testUsers });
