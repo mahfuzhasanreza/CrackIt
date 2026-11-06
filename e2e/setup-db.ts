@@ -49,7 +49,7 @@ async function main() {
         update: data,
         create: { email: u.email, ...data },
       });
-      await seedDefaultsForUser(prisma, user.id);
+      await seedDefaultsForUser(prisma, user.id, { starterTracks: true });
     }
     await seedAnalyticsHistory(prisma);
   } finally {

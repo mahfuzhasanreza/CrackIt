@@ -1,6 +1,9 @@
 /**
- * Create a login account (there is no public sign-up).
+ * Create a login account from the command line (people can also sign up at /register).
  *   pnpm user:create --email you@example.com [--name "Your Name"] [--timezone Asia/Dhaka]
+ *                    [--starter-tracks]
+ * --starter-tracks also adds the SWE / Full-Stack and University Lecturer tracks with their
+ * topic roadmaps; without it the account starts with no tracks, like a sign-up.
  * Password is prompted (hidden) or read from CRACKIT_PASSWORD.
  */
 import { parseArgs } from "node:util";
@@ -19,6 +22,7 @@ const { values } = parseArgs({
     email: { type: "string" },
     name: { type: "string" },
     timezone: { type: "string", default: "Asia/Dhaka" },
+    "starter-tracks": { type: "boolean", default: false },
   },
 });
 
@@ -44,8 +48,13 @@ async function main() {
         passwordHash: await hashPassword(password),
       },
     });
-    await seedDefaultsForUser(prisma, user.id);
-    console.log(`Created ${email} with default tracks, topics and activity types.`);
+    const starterTracks = values["starter-tracks"] ?? false;
+    await seedDefaultsForUser(prisma, user.id, { starterTracks });
+    console.log(
+      starterTracks
+        ? `Created ${email} with the starter tracks, topics and activity types.`
+        : `Created ${email} with the default activity types (no tracks yet).`,
+    );
   } finally {
     await prisma.$disconnect();
   }

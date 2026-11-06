@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 import { Label } from "@/components/ui/label";
@@ -128,6 +129,15 @@ export function RefPickers({
           </SelectContent>
         </Select>
         <FieldError id={`${idPrefix}-track-error`} errors={fieldErrors?.trackId} />
+        {options.tracks.length === 0 && (
+          <p className="text-xs text-muted-foreground">
+            No tracks yet —{" "}
+            <Link href="/settings?tab=tracks&add=1" className="underline underline-offset-2">
+              add what you&apos;re preparing for
+            </Link>{" "}
+            to log study time.
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-2">

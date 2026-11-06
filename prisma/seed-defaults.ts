@@ -3,11 +3,17 @@ import { DEFAULT_ACTIVITY_TYPES } from "../src/modules/time-tracking/defaults";
 import { DEFAULT_TRACKS, type DefaultTopic } from "../src/modules/tracks-topics/defaults";
 
 /**
- * Give a user the default tracks, topic tree and activity types.
+ * Give a user the default activity types and, only when asked, the starter tracks with their
+ * topic trees (SWE / Full-Stack, University Lecturer). New sign-ups get no tracks: they pick
+ * their own targets (or a template) on first visit.
  * Idempotent: safe to run repeatedly; existing rows (matched by name) are left untouched.
- * Reused by `pnpm db:seed` and (Phase 2) `pnpm user:create`.
+ * Used by `pnpm db:seed`, `pnpm user:create`, sign-up and tests.
  */
-export async function seedDefaultsForUser(prisma: PrismaClient, userId: string) {
+export async function seedDefaultsForUser(
+  prisma: PrismaClient,
+  userId: string,
+  { starterTracks = false }: { starterTracks?: boolean } = {},
+) {
   for (const [i, a] of DEFAULT_ACTIVITY_TYPES.entries()) {
     await prisma.activityType.upsert({
       where: { userId_name: { userId, name: a.name } },
@@ -16,6 +22,7 @@ export async function seedDefaultsForUser(prisma: PrismaClient, userId: string) 
     });
   }
 
+  if (!starterTracks) return;
   for (const [i, t] of DEFAULT_TRACKS.entries()) {
     const track = await prisma.track.upsert({
       where: { userId_name: { userId, name: t.name } },

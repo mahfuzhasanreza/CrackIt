@@ -94,4 +94,7 @@ export const activityTypeSchema = z.object({
 export type ActivityTypeInput = z.infer<typeof activityTypeSchema>;
 
 export const idSchema = z.object({ id: z.uuid() });
+
+/** A starter template by name (see tracks-topics/defaults.ts). */
+export const templateSchema = z.object({ name: z.string().min(1).max(60) });
 export const moveSchema = z.object({ id: z.uuid(), direction: z.enum(["up", "down"]) });

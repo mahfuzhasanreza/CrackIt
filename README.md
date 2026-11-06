@@ -69,8 +69,9 @@ One-time setup:
    `DATABASE_URL_UNPOOLED` (direct, used by migrations) for Production and every preview.
 3. **Env vars** (Vercel → Settings → Environment Variables, Production + Preview):
    `AUTH_SECRET` (`openssl rand -base64 32`; use a different value for Preview).
-4. **First user**: sign up at `/register` (open to anyone, rate-limited per IP), or from your
-   machine: `DATABASE_URL="<Neon direct URL>" pnpm user:create --email you@example.com`
+4. **First user**: sign up at `/register` (open to anyone, rate-limited per IP; new accounts
+   choose their own tracks or start from the SWE / Lecturer templates), or from your machine:
+   `DATABASE_URL="<Neon direct URL>" pnpm user:create --email you@example.com [--starter-tracks]`
 5. **GitHub secrets** (Settings → Secrets and variables → Actions):
    - `BACKUP_DATABASE_URL`: the Neon production _direct_ URL, and `BACKUP_PASSPHRASE`: a long
      random passphrase (keep a copy in your password manager). Used by the nightly

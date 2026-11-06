@@ -23,8 +23,8 @@ export default function RegisterPage() {
             <h1>Create an account</h1>
           </CardTitle>
           <CardDescription>
-            You start with SWE and lecturer tracks, a topic roadmap and activity types — edit them
-            any time in Settings.
+            Next, you choose what you&apos;re preparing for — your own tracks, or a template to
+            start from.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">

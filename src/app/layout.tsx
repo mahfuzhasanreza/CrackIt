@@ -20,7 +20,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: { default: "CrackIt", template: "%s · CrackIt" },
-  description: "Track every hour of interview prep — SWE and university lecturer.",
+  description: "Track every hour of interview prep, for whatever you are preparing for.",
   applicationName: "CrackIt",
   appleWebApp: { capable: true, title: "CrackIt", statusBarStyle: "default" },
   icons: { apple: "/icons/apple-touch-icon.png" },
