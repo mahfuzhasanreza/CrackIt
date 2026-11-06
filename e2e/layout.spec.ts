@@ -77,3 +77,26 @@ for (const width of [360, 768, 1024]) {
     }
   });
 }
+
+test("phone menu scrolls only when it doesn't fit", async ({ page }) => {
+  await logInAs(page, USERS.main);
+  const menuScrolls = () =>
+    page.getByRole("dialog").evaluate((d) => {
+      const list = d.querySelector(".overflow-y-auto")!;
+      return list.scrollHeight > list.clientHeight;
+    });
+
+  // A tall phone: everything fits, nothing to scroll.
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.goto("/dashboard");
+  await page.getByRole("button", { name: "Open menu" }).click();
+  expect(await menuScrolls()).toBe(false);
+  await page.keyboard.press("Escape");
+
+  // A short phone (or landscape): the menu scrolls and the last item is reachable.
+  await page.setViewportSize({ width: 390, height: 500 });
+  await page.getByRole("button", { name: "Open menu" }).click();
+  expect(await menuScrolls()).toBe(true);
+  await page.getByRole("dialog").getByRole("link", { name: "Settings" }).click();
+  await expect(page).toHaveURL(/\/settings/);
+});

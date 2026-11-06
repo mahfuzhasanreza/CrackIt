@@ -19,14 +19,17 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-64 p-0">
-        <SheetHeader className="border-b">
+        <SheetHeader className="shrink-0 border-b">
           <SheetTitle asChild>
             <div>
               <Brand />
             </div>
           </SheetTitle>
         </SheetHeader>
-        <SidebarNav onNavigate={() => setOpen(false)} />
+        {/* Scrolls only when the menu is taller than the screen (short phones, landscape). */}
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+          <SidebarNav onNavigate={() => setOpen(false)} />
+        </div>
       </SheetContent>
     </Sheet>
   );
