@@ -50,6 +50,7 @@ model User {
   applicationEvents        ApplicationEvent[]
   interviews               Interview[]
   mockInterviews           MockInterview[]
+  resources                Resource[]
 
   @@map("users")
 }
@@ -74,6 +75,7 @@ model Track {
   checklists      Checklist[]
   applications    Application[]
   mockInterviews  MockInterview[]
+  resources       Resource[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -739,4 +741,55 @@ model MockInterview {
   @@index([userId, date])
   @@index([trackId])
   @@map("mock_interviews")
+}
+
+// ─── Resources ───────────────────────────────────────────────────────────────
+
+enum ResourceType {
+  BOOK
+  COURSE
+  VIDEO
+  ARTICLE
+  SHEET
+  OTHER
+
+  @@map("resource_type")
+}
+
+enum ResourceStatus {
+  PLANNED
+  IN_PROGRESS
+  DONE
+  DROPPED
+
+  @@map("resource_status")
+}
+
+/// A book, course, video series, article or problem sheet, with unit-based progress.
+model Resource {
+  id             String         @id @default(uuid(7)) @db.Uuid
+  userId         String         @map("user_id") @db.Uuid
+  trackId        String?        @map("track_id") @db.Uuid
+  title          String
+  author         String?
+  type           ResourceType
+  url            String?
+  /// What a unit is ("chapters", "lessons", …). NULL = the type's default.
+  unitLabel      String?        @map("unit_label")
+  /// NULL = open-ended (progress is a count only).
+  totalUnits     Int?           @map("total_units")
+  completedUnits Int            @default(0) @map("completed_units")
+  status         ResourceStatus @default(PLANNED)
+  startedOn      DateTime?      @map("started_on") @db.Date
+  finishedOn     DateTime?      @map("finished_on") @db.Date
+  rating         Int?           @db.SmallInt
+  notesMd        String         @default("") @map("notes_md")
+  createdAt      DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status])
+  @@map("resources")
 }
