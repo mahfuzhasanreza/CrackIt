@@ -134,28 +134,27 @@ export function KanbanBoard({
           },
         }}
       >
-        <div className="-mx-4 overflow-x-auto px-4 pb-2 md:-mx-8 md:px-8">
-          <div className="flex min-w-max gap-3">
-            {PIPELINE.map((status) => (
-              <Column
-                key={status}
-                status={status}
-                cards={optimistic.filter((c) => c.status === status)}
-                onAdd={() => setDialog({ kind: "add", status })}
-                renderCard={(card) => (
-                  <DraggableCard
-                    key={card.id}
-                    card={card}
-                    today={board.today}
-                    timezone={timezone}
-                    onMove={(to) => move(card.id, to)}
-                    onEdit={() => setDialog({ kind: "edit", card })}
-                    onDelete={() => setDialog({ kind: "delete", card })}
-                  />
-                )}
-              />
-            ))}
-          </div>
+        {/* Columns wrap onto new rows instead of scrolling sideways: as many as fit, each ≥ 15rem. */}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,15rem),1fr))] items-start gap-3">
+          {PIPELINE.map((status) => (
+            <Column
+              key={status}
+              status={status}
+              cards={optimistic.filter((c) => c.status === status)}
+              onAdd={() => setDialog({ kind: "add", status })}
+              renderCard={(card) => (
+                <DraggableCard
+                  key={card.id}
+                  card={card}
+                  today={board.today}
+                  timezone={timezone}
+                  onMove={(to) => move(card.id, to)}
+                  onEdit={() => setDialog({ kind: "edit", card })}
+                  onDelete={() => setDialog({ kind: "delete", card })}
+                />
+              )}
+            />
+          ))}
         </div>
         <DragOverlay>
           {active && <CardBody card={active} today={board.today} timezone={timezone} dragging />}
@@ -251,7 +250,7 @@ function Column({
       ref={setNodeRef}
       aria-label={`${STATUS_LABEL[status]} (${cards.length})`}
       className={cn(
-        "flex w-64 shrink-0 flex-col gap-2 rounded-xl border bg-muted/40 p-2 transition-colors",
+        "flex min-w-0 flex-col gap-2 rounded-xl border bg-muted/40 p-2 transition-colors",
         isOver && "border-primary bg-accent",
         isClosed(status) && "bg-muted/20",
       )}
@@ -364,7 +363,7 @@ function CardBody({
   return (
     <div
       className={cn(
-        "flex flex-col gap-1.5 rounded-lg border bg-card p-3 pr-9 text-sm shadow-xs",
+        "flex min-w-0 flex-col gap-1.5 rounded-lg border bg-card p-3 pr-9 text-sm break-words shadow-xs",
         dragging && "rotate-1 shadow-lg",
       )}
     >
@@ -375,7 +374,7 @@ function CardBody({
       >
         {card.role}
       </Link>
-      <span className="flex items-center gap-1.5 text-muted-foreground">
+      <span className="flex min-w-0 items-center gap-1.5 text-muted-foreground">
         {card.track && (
           <span
             aria-hidden
@@ -383,7 +382,7 @@ function CardBody({
             style={{ backgroundColor: card.track.color }}
           />
         )}
-        {card.organization.name}
+        <span className="min-w-0">{card.organization.name}</span>
         {card.jobUrl && (
           <a
             href={card.jobUrl}
@@ -391,7 +390,7 @@ function CardBody({
             rel="noopener noreferrer"
             aria-label="Job posting"
             onPointerDown={(e) => e.stopPropagation()}
-            className="hover:text-foreground"
+            className="shrink-0 hover:text-foreground"
           >
             <ExternalLink className="size-3" />
           </a>

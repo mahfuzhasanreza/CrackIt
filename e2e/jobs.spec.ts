@@ -119,3 +119,33 @@ test("mock interviews and organizations", async ({ page }) => {
   await expect(page.getByText("Organization saved")).toBeVisible();
   await expect(page.getByText("Dhaka")).toBeVisible();
 });
+
+test("kanban: columns wrap and cards fit, no sideways scrolling", async ({ page }) => {
+  await page.goto("/applications");
+  const dialog = page.getByRole("dialog");
+  await page.getByRole("button", { name: "Add application", exact: true }).click();
+  await dialog.getByLabel("Organization").fill("Supercalifragilisticexpialidocious Technologies");
+  await dialog.getByLabel("Role").fill("Principal Distributed Systems Reliability Engineer");
+  await dialog.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Application added")).toBeVisible();
+
+  for (const width of [360, 768, 1280]) {
+    await page.setViewportSize({ width, height: 800 });
+    const sizes = await page.evaluate(() => {
+      const main = document.querySelector("main")!.getBoundingClientRect();
+      const regions = [...document.querySelectorAll("main section[aria-label]")];
+      return {
+        page: Math.max(0, document.documentElement.scrollWidth - window.innerWidth),
+        outside: regions.filter((r) => {
+          const b = r.getBoundingClientRect();
+          return b.left < main.left || b.right > main.right + 0.5;
+        }).length,
+        overflowing: [...document.querySelectorAll("main section[aria-label] li")].filter(
+          (c) => c.scrollWidth > c.clientWidth,
+        ).length,
+        columns: regions.length,
+      };
+    });
+    expect(sizes, `${width}px`).toEqual({ page: 0, outside: 0, overflowing: 0, columns: 7 });
+  }
+});
