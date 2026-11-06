@@ -45,6 +45,11 @@ model User {
   teachingDemos            TeachingDemo[]
   publications             Publication[]
   vivaQuestions            VivaQuestion[]
+  organizations            Organization[]
+  applications             Application[]
+  applicationEvents        ApplicationEvent[]
+  interviews               Interview[]
+  mockInterviews           MockInterview[]
 
   @@map("users")
 }
@@ -67,6 +72,8 @@ model Track {
   timeEntries     TimeEntry[]
   learningEntries LearningEntry[]
   checklists      Checklist[]
+  applications    Application[]
+  mockInterviews  MockInterview[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -575,4 +582,161 @@ model VivaQuestion {
   @@index([userId, nextReviewOn])
   @@index([courseId])
   @@map("viva_questions")
+}
+
+// ─── Job hunt ────────────────────────────────────────────────────────────────
+
+enum OrganizationType {
+  COMPANY
+  UNIVERSITY
+
+  @@map("organization_type")
+}
+
+model Organization {
+  id        String           @id @default(uuid(7)) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  name      String
+  type      OrganizationType @default(COMPANY)
+  website   String?
+  location  String?
+  notesMd   String           @default("") @map("notes_md")
+  createdAt DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications Application[]
+
+  @@unique([userId, name])
+  @@map("organizations")
+}
+
+enum ApplicationStatus {
+  WISHLIST
+  APPLIED
+  OA
+  INTERVIEWING
+  OFFER
+  REJECTED
+  WITHDRAWN
+
+  @@map("application_status")
+}
+
+/// A job application. Status changes are logged in application_events.
+model Application {
+  id             String            @id @default(uuid(7)) @db.Uuid
+  userId         String            @map("user_id") @db.Uuid
+  organizationId String            @map("organization_id") @db.Uuid
+  trackId        String?           @map("track_id") @db.Uuid
+  role           String
+  jobUrl         String?           @map("job_url")
+  source         String?
+  status         ApplicationStatus @default(WISHLIST)
+  appliedOn      DateTime?         @map("applied_on") @db.Date
+  deadlineOn     DateTime?         @map("deadline_on") @db.Date
+  salaryRange    String?           @map("salary_range")
+  notesMd        String            @default("") @map("notes_md")
+  createdAt      DateTime          @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime          @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Deleting an organization deletes its applications (the UI confirms with a count).
+  organization Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  track        Track?             @relation(fields: [trackId], references: [id], onDelete: SetNull)
+  events       ApplicationEvent[]
+  interviews   Interview[]
+
+  @@index([userId, status])
+  @@index([organizationId])
+  @@index([trackId])
+  @@map("applications")
+}
+
+/// Pipeline history: one row per status change (from NULL = created).
+model ApplicationEvent {
+  id            String             @id @default(uuid(7)) @db.Uuid
+  userId        String             @map("user_id") @db.Uuid
+  applicationId String             @map("application_id") @db.Uuid
+  fromStatus    ApplicationStatus? @map("from_status")
+  toStatus      ApplicationStatus  @map("to_status")
+  at            DateTime           @default(now()) @db.Timestamptz(3)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, at])
+  @@index([userId, at])
+  @@map("application_events")
+}
+
+enum InterviewRound {
+  SCREENING
+  OA
+  TECHNICAL
+  SYSTEM_DESIGN
+  BEHAVIORAL
+  HR
+  TEACHING_DEMO
+  VIVA
+  WRITTEN
+
+  @@map("interview_round")
+}
+
+enum InterviewOutcome {
+  PENDING
+  PASSED
+  FAILED
+  CANCELLED
+
+  @@map("interview_outcome")
+}
+
+model Interview {
+  id            String           @id @default(uuid(7)) @db.Uuid
+  userId        String           @map("user_id") @db.Uuid
+  applicationId String           @map("application_id") @db.Uuid
+  round         InterviewRound
+  scheduledAt   DateTime         @map("scheduled_at") @db.Timestamptz(3)
+  durationMin   Int?             @map("duration_min")
+  interviewer   String?
+  questionsMd   String           @default("") @map("questions_md")
+  myAnswersMd   String           @default("") @map("my_answers_md")
+  outcome       InterviewOutcome @default(PENDING)
+  /// 1–5
+  selfRating    Int?             @map("self_rating") @db.SmallInt
+  lessonsMd     String           @default("") @map("lessons_md")
+  createdAt     DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime         @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, scheduledAt])
+  @@index([applicationId])
+  @@map("interviews")
+}
+
+/// Practice interview (Pramp, a friend, a mentor...).
+model MockInterview {
+  id         String         @id @default(uuid(7)) @db.Uuid
+  userId     String         @map("user_id") @db.Uuid
+  trackId    String?        @map("track_id") @db.Uuid
+  /// Logical day.
+  date       DateTime       @db.Date
+  partner    String?
+  type       InterviewRound
+  /// 1–5
+  score      Int?           @db.SmallInt
+  feedbackMd String         @default("") @map("feedback_md")
+  createdAt  DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: SetNull)
+
+  @@index([userId, date])
+  @@index([trackId])
+  @@map("mock_interviews")
 }

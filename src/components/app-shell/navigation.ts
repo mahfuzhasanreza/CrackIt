@@ -44,8 +44,8 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Hunt",
     items: [
-      { title: "Applications", href: "/applications", icon: Briefcase, ready: false },
-      { title: "Interviews", href: "/interviews", icon: Users, ready: false },
+      { title: "Applications", href: "/applications", icon: Briefcase, ready: true },
+      { title: "Interviews", href: "/interviews", icon: Users, ready: true },
     ],
   },
   {

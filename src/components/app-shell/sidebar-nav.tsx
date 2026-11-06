@@ -2,14 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Suspense } from "react";
 
 import { cn } from "@/lib/utils";
 
 import { NAV_GROUPS } from "./navigation";
 
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
-  const pathname = usePathname();
+type Props = { onNavigate?: () => void };
 
+/**
+ * Main navigation. The pathname (for the active highlight) is read in a small leaf inside
+ * <Suspense>: on routes with dynamic params it's only known at request time, and with Cache
+ * Components an unwrapped read would fail the build. The fallback is the same list, unhighlighted.
+ */
+export function SidebarNav(props: Props) {
+  return (
+    <Suspense fallback={<NavList {...props} pathname={null} />}>
+      <ActiveNav {...props} />
+    </Suspense>
+  );
+}
+
+function ActiveNav(props: Props) {
+  return <NavList {...props} pathname={usePathname()} />;
+}
+
+function NavList({ onNavigate, pathname }: Props & { pathname: string | null }) {
   return (
     <nav aria-label="Main" className="flex flex-col gap-5 px-3 py-4">
       {NAV_GROUPS.map((group) => (
@@ -18,7 +36,8 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
             {group.label}
           </p>
           {group.items.map(({ title, href, icon: Icon, ready }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
+            const active =
+              pathname !== null && (pathname === href || pathname.startsWith(`${href}/`));
             const classes = cn(
               "flex items-center gap-2.5 rounded-md px-2 py-1.5 text-sm",
               active ? "bg-accent font-medium text-accent-foreground" : "text-foreground/80",

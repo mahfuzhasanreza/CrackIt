@@ -79,6 +79,9 @@ UI (Server/Client Components)
   page that shows user data **and** in every Server Action / Route Handler.
 - Anything reading the session must render inside `<Suspense>` (Cache Components); never
   `await` the session at the top level of a layout.
+- Same for client route hooks in shared UI: `usePathname()` / `useParams()` suspend on routes
+  with dynamic params (e.g. `/applications/[id]`), so read them in a small leaf inside
+  `<Suspense>` (see `components/app-shell/sidebar-nav.tsx`) or `next build` fails.
 - Rate limit: 5 failures / 15 min per email, 20 per IP (`login_attempts` table).
 
 ## Prisma 7 notes
@@ -156,6 +159,16 @@ UI (Server/Client Components)
 - Publications past WRITING need `submitted_on` (DB CHECK); `lecturer/rules.ts` fills it with the
   entered date, else the existing one, else today. Viva questions use the shared spaced-repetition
   schedule (first practice tomorrow). Demo dates can't be in the future.
+
+## Job hunt rules
+
+- Pipeline rules live in `jobs/rules.ts`: leaving WISHLIST records `applied_on` (DB CHECK);
+  every status change writes an `application_events` row; adding an interview moves the
+  application forward (OA round → OA, others → INTERVIEWING), never backwards or out of
+  OFFER / REJECTED / WITHDRAWN. Organizations are found-or-created by name (case-insensitive).
+- Kanban uses `@dnd-kit/core` (mouse, touch and keyboard sensors + announcements); every card
+  also has a "Move to" menu as the non-drag alternative.
+- Date keys as labels: `formatDateKey` from `@/lib/dates` (works on server and client).
 
 ## Charts & colors
 

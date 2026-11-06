@@ -13,6 +13,8 @@ const PAGES = [
   "/problems",
   "/projects",
   "/lecturer",
+  "/applications",
+  "/interviews",
 ];
 
 test("sidebar stays put and the header matches it on every page", async ({ page }) => {
