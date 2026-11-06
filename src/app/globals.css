@@ -143,3 +143,15 @@
     border-color: var(--series-dark, var(--series));
   }
 }
+@utility stroke-series {
+  stroke: var(--series);
+  :where(.dark) & {
+    stroke: var(--series-dark, var(--series));
+  }
+}
+@utility fill-series {
+  fill: var(--series);
+  :where(.dark) & {
+    fill: var(--series-dark, var(--series));
+  }
+}
