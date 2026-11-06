@@ -5,7 +5,7 @@ import type { ActionState } from "@/lib/action-state";
 
 import { requireUser } from "../auth/dal";
 
-import { STATUS_LABEL } from "./labels";
+import { OUTCOME_LABEL, STATUS_LABEL } from "./labels";
 import * as service from "./service";
 import {
   applicationFormSchema,
@@ -14,6 +14,7 @@ import {
   mockFormSchema,
   moveSchema,
   organizationFormSchema,
+  outcomeSchema,
 } from "./validators";
 
 export async function saveApplicationAction(
@@ -66,9 +67,24 @@ export async function saveInterviewAction(
     result,
     parsed.data.id
       ? "Interview saved"
-      : moved
-        ? `Interview added; application moved to ${STATUS_LABEL[moved]}`
-        : "Interview added",
+      : !parsed.data.applicationId
+        ? "Interview added, with a new application"
+        : moved
+          ? `Interview added; application moved to ${STATUS_LABEL[moved]}`
+          : "Interview added",
+  );
+}
+
+export async function setInterviewOutcomeAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const parsed = outcomeSchema.safeParse(formFields(formData));
+  if (!parsed.success) return invalidState(parsed.error.flatten().fieldErrors);
+  return toActionState(
+    await service.setInterviewOutcome(user, parsed.data),
+    `Marked as ${OUTCOME_LABEL[parsed.data.outcome].toLowerCase()}`,
   );
 }
 
@@ -78,7 +94,11 @@ export async function saveMockAction(_prev: ActionState, formData: FormData): Pr
   if (!parsed.success) return invalidState(parsed.error.flatten().fieldErrors);
   return toActionState(
     await service.saveMock(user, parsed.data),
-    parsed.data.id ? "Mock interview saved" : "Mock interview logged",
+    parsed.data.id
+      ? "Mock interview saved"
+      : parsed.data.date > (await service.todayFor(user))
+        ? "Mock interview scheduled"
+        : "Mock interview logged",
   );
 }
 

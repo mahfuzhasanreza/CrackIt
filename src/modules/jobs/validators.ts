@@ -67,19 +67,35 @@ export const organizationFormSchema = z.object({
 });
 export type OrganizationFormInput = z.infer<typeof organizationFormSchema>;
 
-export const interviewFormSchema = z.object({
-  id: optional(id),
-  applicationId: id,
-  round: z.enum(ROUNDS),
-  scheduledAt: localDateTime,
-  durationMin: optional(z.coerce.number().int().min(1).max(1440)),
-  interviewer: shortText(200),
-  outcome: z.enum(OUTCOMES).default("PENDING"),
-  selfRating: optional(z.coerce.number().int().min(1).max(5)),
-  questionsMd: markdown,
-  myAnswersMd: markdown,
-  lessonsMd: markdown,
-});
+export const interviewFormSchema = z
+  .object({
+    id: optional(id),
+    /** An existing application, or (new interviews only) one created from the two fields below. */
+    applicationId: optional(id),
+    newOrganizationName: shortText(120),
+    newRole: shortText(200),
+    round: z.enum(ROUNDS),
+    scheduledAt: localDateTime,
+    durationMin: optional(z.coerce.number().int().min(1).max(1440)),
+    interviewer: shortText(200),
+    outcome: z.enum(OUTCOMES).default("PENDING"),
+    selfRating: optional(z.coerce.number().int().min(1).max(5)),
+    questionsMd: markdown,
+    myAnswersMd: markdown,
+    lessonsMd: markdown,
+  })
+  .superRefine((v, ctx) => {
+    if (v.applicationId || v.id) return;
+    if (!v.newOrganizationName) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["newOrganizationName"],
+        message: "Which organization?",
+      });
+    }
+    if (!v.newRole)
+      ctx.addIssue({ code: "custom", path: ["newRole"], message: "What's the role?" });
+  });
 export type InterviewFormInput = z.infer<typeof interviewFormSchema>;
 
 export const mockFormSchema = z.object({
@@ -92,6 +108,14 @@ export const mockFormSchema = z.object({
   feedbackMd: markdown,
 });
 export type MockFormInput = z.infer<typeof mockFormSchema>;
+
+/** Quick "how did it go?" from a list or the detail page. */
+export const outcomeSchema = z.object({
+  id,
+  outcome: z.enum(OUTCOMES),
+  selfRating: optional(z.coerce.number().int().min(1).max(5)),
+});
+export type OutcomeInput = z.infer<typeof outcomeSchema>;
 
 export const deleteSchema = z.object({
   id,

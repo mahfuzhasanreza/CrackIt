@@ -38,6 +38,7 @@ import { ORG_TYPE_LABEL, OUTCOME_LABEL, ROUND_LABEL, STATUS_LABEL } from "../lab
 import { ORG_TYPES, OUTCOMES, ROUNDS, STATUSES } from "../validators";
 
 const NONE = "__none";
+const NEW_APPLICATION = "__new";
 export type TrackChoice = { id: string; name: string; color: string };
 
 function EnumSelect<T extends string>({
@@ -338,7 +339,12 @@ export function InterviewForm({
 }) {
   const [state, action, pending] = useToastAction(saveInterviewAction, onDone);
   const onSubmit = useNoResetSubmit(action);
-  const [appId, setAppId] = useState(interview?.applicationId ?? applicationId ?? "");
+  const [appId, setAppId] = useState(
+    interview?.applicationId ??
+      applicationId ??
+      (applications && applications.length === 0 ? NEW_APPLICATION : ""),
+  );
+  const creatingApp = appId === NEW_APPLICATION;
   const [round, setRound] = useState<InterviewRound>(interview?.round ?? "TECHNICAL");
   const [outcome, setOutcome] = useState<InterviewOutcome>(interview?.outcome ?? "PENDING");
   const err = state.fieldErrors;
@@ -358,7 +364,7 @@ export function InterviewForm({
       onSubmit={onSubmit}
     >
       {interview && <input type="hidden" name="id" value={interview.id} />}
-      <input type="hidden" name="applicationId" value={appId} />
+      <input type="hidden" name="applicationId" value={creatingApp ? "" : appId} />
       <input type="hidden" name="round" value={round} />
       <input type="hidden" name="outcome" value={outcome} />
       {!applicationId && !interview && applications && (
@@ -377,9 +383,41 @@ export function InterviewForm({
                   {a.organization.name} · {a.role}
                 </SelectItem>
               ))}
+              <SelectItem value={NEW_APPLICATION}>+ New application…</SelectItem>
             </SelectContent>
           </Select>
         </Field>
+      )}
+      {creatingApp && (
+        <div className="grid gap-4 rounded-lg border border-dashed p-3 sm:grid-cols-2">
+          <Field id="interview-new-org" label="Organization" error={err?.newOrganizationName}>
+            <Input
+              id="interview-new-org"
+              name="newOrganizationName"
+              maxLength={120}
+              list="interview-org-names"
+              required
+              aria-invalid={Boolean(err?.newOrganizationName)}
+            />
+            <datalist id="interview-org-names">
+              {[...new Set((applications ?? []).map((a) => a.organization.name))].map((n) => (
+                <option key={n} value={n} />
+              ))}
+            </datalist>
+          </Field>
+          <Field id="interview-new-role" label="Role" error={err?.newRole}>
+            <Input
+              id="interview-new-role"
+              name="newRole"
+              maxLength={200}
+              required
+              aria-invalid={Boolean(err?.newRole)}
+            />
+          </Field>
+          <p className="text-xs text-muted-foreground sm:col-span-2">
+            Creates the application as Applied (today); you can edit it on the board.
+          </p>
+        </div>
       )}
       <div className="grid gap-4 sm:grid-cols-2">
         <Field id="interview-round" label="Round">
@@ -391,7 +429,7 @@ export function InterviewForm({
             labels={ROUND_LABEL}
           />
         </Field>
-        <Field id="interview-outcome" label="Outcome">
+        <Field id="interview-outcome" label="Outcome" error={err?.outcome}>
           <EnumSelect
             id="interview-outcome"
             value={outcome}
@@ -483,7 +521,8 @@ export function MockForm({
   const err = state.fieldErrors;
   return (
     <Shell
-      title={mock ? "Edit mock interview" : "Log a mock interview"}
+      title={mock ? "Edit mock interview" : "Log or schedule a mock"}
+      description="Pick a future date to schedule one; score it afterwards."
       state={state}
       pending={pending}
       onSubmit={onSubmit}
@@ -498,7 +537,6 @@ export function MockForm({
             name="date"
             type="date"
             required
-            max={today}
             defaultValue={mock?.dateKey ?? today}
             aria-invalid={Boolean(err?.date)}
           />
@@ -532,6 +570,7 @@ export function MockForm({
         defaultValue={mock?.score}
         idPrefix="mock"
       />
+      {err?.score?.[0] && <p className="text-sm text-destructive">{err.score[0]}</p>}
       <Field id="mock-feedback" label="Feedback (Markdown)" optional>
         {md("mock-feedback", "feedbackMd", mock?.feedbackMd ?? "")}
       </Field>

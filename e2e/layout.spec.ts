@@ -15,6 +15,7 @@ const PAGES = [
   "/lecturer",
   "/applications",
   "/interviews",
+  "/interviews?view=calendar",
   "/resources",
   "/analytics",
   "/settings",

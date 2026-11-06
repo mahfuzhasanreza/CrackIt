@@ -66,16 +66,25 @@ test("kanban: add, drag, move, interview moves it forward, history", async ({ pa
   await expect(history.getByText("Moved to Online assessment")).toBeVisible();
   await expect(history.getByText("Moved to Interviewing")).toBeVisible();
 
-  const interview = page.getByRole("listitem", { name: "Technical" });
-  await interview.getByRole("button", { name: "Show notes" }).click();
-  await expect(interview.locator("strong", { hasText: "LRU cache" })).toBeVisible();
+  // The interview's own page shows the notes.
+  await page
+    .getByRole("listitem", { name: "Technical" })
+    .getByRole("link", { name: "Technical" })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Technical · Acme Corp", level: 1 }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Questions asked" })
+      .locator("strong", { hasText: "LRU cache" }),
+  ).toBeVisible();
 
   // It shows up as upcoming on the interviews page and the dashboard.
   await page.getByRole("link", { name: "Interviews", exact: true }).first().click();
   await expect(
     page
-      .getByRole("heading", { name: "Upcoming" })
-      .locator("../../..")
+      .getByRole("region", { name: /^Upcoming/ })
       .getByRole("listitem", { name: "Technical · Acme Corp" }),
   ).toBeVisible();
   await page.goto("/dashboard");
@@ -85,7 +94,7 @@ test("kanban: add, drag, move, interview moves it forward, history", async ({ pa
 test("mock interviews and organizations", async ({ page }) => {
   await page.goto("/interviews");
   const dialog = page.getByRole("dialog");
-  await page.getByRole("button", { name: "Log mock interview" }).click();
+  await page.getByRole("button", { name: "Add mock interview" }).click();
   await pick(page, "Type", "System design");
   await dialog.getByLabel("Partner / platform (optional)").fill("Pramp");
   await dialog.getByRole("group", { name: /Score/ }).getByText("3", { exact: true }).click();

@@ -8,6 +8,7 @@ import {
   deleteRecord,
   getApplicationDetail,
   getBoard,
+  getInterviewDetail,
   getInterviewsPage,
   getUpcomingInterviews,
   moveApplication,
@@ -15,6 +16,7 @@ import {
   saveInterview,
   saveMock,
   saveOrganization,
+  setInterviewOutcome,
 } from "./service";
 import type { ApplicationFormInput, InterviewFormInput } from "./validators";
 
@@ -143,7 +145,10 @@ describe("interviews", () => {
     expect(page.upcoming.map((i) => i.scheduledAt.toISOString())).toEqual([
       "2026-11-10T09:00:00.000Z",
     ]);
-    expect(page.past.map((i) => i.round)).toEqual(["HR"]);
+    expect(page.upcoming[0]!.dayKey).toBe("2026-11-10");
+    // Over but still pending → needs an outcome, not "past".
+    expect(page.needsOutcome.map((i) => i.round)).toEqual(["HR"]);
+    expect(page.past).toEqual([]);
 
     const board = await getBoard(user, on(TODAY));
     const card = board.columns.find((c) => c.status === "INTERVIEWING")!.cards[0]!;
@@ -152,6 +157,67 @@ describe("interviews", () => {
 
     expect((await getUpcomingInterviews(user.id, on(TODAY))).length).toBe(1);
     expect((await getUpcomingInterviews(user.id, on(TODAY), 3)).length).toBe(0);
+  });
+
+  it("results only after it happened; a quick outcome moves it to past", async () => {
+    const a = await create({ status: "APPLIED" });
+    const early = await saveInterview(user, interview(a, { outcome: "PASSED" }), on(TODAY));
+    expect(early.ok).toBe(false);
+    if (!early.ok) expect(early.error.fieldErrors?.outcome).toBeTruthy();
+
+    const saved = await saveInterview(user, interview(a), on(TODAY));
+    if (!saved.ok) throw new Error(saved.error.message);
+    const { id } = saved.data;
+    expect((await setInterviewOutcome(user, { id, outcome: "PASSED" }, on(TODAY))).ok).toBe(false);
+    // Cancelling a future one is fine and takes it out of "upcoming".
+    expect((await setInterviewOutcome(user, { id, outcome: "CANCELLED" }, on(TODAY))).ok).toBe(
+      true,
+    );
+    expect((await getInterviewsPage(user, on(TODAY))).past.map((i) => i.id)).toEqual([id]);
+
+    const after = on("2026-11-11");
+    expect(
+      (await setInterviewOutcome(user, { id, outcome: "PASSED", selfRating: 4 }, after)).ok,
+    ).toBe(true);
+    const detail = await getInterviewDetail(user, id, after);
+    expect(detail).toMatchObject({
+      bucket: "past",
+      interview: { outcome: "PASSED", selfRating: 4 },
+    });
+
+    const other = { ...user, id: (await createTestUser()).user.id };
+    expect((await setInterviewOutcome(other, { id, outcome: "FAILED" }, after)).ok).toBe(false);
+    expect(await getInterviewDetail(other, id)).toBeNull();
+  });
+
+  it("can create its application on the spot, which then moves to Interviewing", async () => {
+    const res = await saveInterview(
+      user,
+      {
+        round: "TECHNICAL",
+        scheduledAt: "2026-11-10T15:00",
+        outcome: "PENDING",
+        newOrganizationName: "Initech",
+        newRole: "Platform Engineer",
+        questionsMd: "",
+        myAnswersMd: "",
+        lessonsMd: "",
+      },
+      on(TODAY),
+    );
+    expect(res.ok && res.data.movedTo).toBe("INTERVIEWING");
+    if (!res.ok) return;
+    const appRow = await db.application.findUniqueOrThrow({
+      where: { id: res.data.applicationId },
+      include: { organization: true },
+    });
+    expect(appRow).toMatchObject({ role: "Platform Engineer", status: "INTERVIEWING" });
+    expect(appRow.organization.name).toBe("Initech");
+    expect((await events(appRow.id)).map((e) => e.toStatus)).toEqual(["APPLIED", "INTERVIEWING"]);
+
+    const detail = await getInterviewDetail(user, res.data.id, on(TODAY));
+    expect(detail?.otherRounds).toEqual([]);
+    expect(detail?.bucket).toBe("upcoming");
   });
 
   it("editing an interview doesn't move the application", async () => {
@@ -185,7 +251,7 @@ describe("organizations, mocks and ownership", () => {
     ).toBe(true);
   });
 
-  it("logs mock interviews, not in the future", async () => {
+  it("logs past mocks and schedules future ones (scored afterwards)", async () => {
     expect(
       (
         await saveMock(
@@ -195,13 +261,22 @@ describe("organizations, mocks and ownership", () => {
         )
       ).ok,
     ).toBe(true);
-    const future = await saveMock(
+    const scheduled = await saveMock(
       user,
       { date: "2026-11-06", type: "HR", feedbackMd: "" },
       on(TODAY),
     );
-    expect(future.ok).toBe(false);
-    expect((await getInterviewsPage(user, on(TODAY))).mocks).toHaveLength(1);
+    expect(scheduled.ok).toBe(true);
+    const scoredEarly = await saveMock(
+      user,
+      { date: "2026-11-06", type: "HR", score: 4, feedbackMd: "" },
+      on(TODAY),
+    );
+    expect(scoredEarly.ok).toBe(false);
+    const page = await getInterviewsPage(user, on(TODAY));
+    expect(page.mocks).toHaveLength(2);
+    expect(page.upcomingMocks.map((m) => m.dateKey)).toEqual(["2026-11-06"]);
+    expect(page.stats).toMatchObject({ mocksDone: 1, avgMockScore: 3 });
   });
 
   it("other users can't move, interview, delete or see applications", async () => {

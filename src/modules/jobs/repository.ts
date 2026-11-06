@@ -156,7 +156,28 @@ export function listUpcomingInterviews(userId: string, from: Date, until: Date, 
 export function findInterview(userId: string, id: string) {
   return db.interview.findFirst({
     where: { id, userId },
-    select: { id: true, applicationId: true },
+    select: { id: true, applicationId: true, scheduledAt: true },
+  });
+}
+
+export function findInterviewDetail(userId: string, id: string) {
+  return db.interview.findFirst({
+    where: { id, userId },
+    include: {
+      application: {
+        select: {
+          id: true,
+          role: true,
+          status: true,
+          jobUrl: true,
+          organization: { select: { id: true, name: true, type: true } },
+          interviews: {
+            orderBy: { scheduledAt: "asc" },
+            select: { id: true, round: true, scheduledAt: true, outcome: true },
+          },
+        },
+      },
+    },
   });
 }
 
