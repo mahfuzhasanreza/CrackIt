@@ -155,6 +155,9 @@ export async function stopTimer(
 ): Promise<Result<TimeEntryView>> {
   const running = await repo.findRunningEntry(userId);
   if (!running) return err("NOT_FOUND", "No timer is running.");
+  if (input.entryId && input.entryId !== running.id) {
+    return err("CONFLICT", "That timer has already stopped; another one is running.");
+  }
   const endedAt = now > running.startedAt ? now : new Date(running.startedAt.getTime() + 1000);
   const updated = await repo.updateEntry(userId, running.id, {
     endedAt,

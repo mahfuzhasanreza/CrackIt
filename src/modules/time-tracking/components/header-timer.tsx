@@ -12,7 +12,10 @@ export async function HeaderTimer() {
       serverNow={new Date()}
       running={
         running && {
+          id: running.id,
           name: running.activityType.name,
+          track: running.track?.name ?? null,
+          topic: running.topic?.name ?? null,
           color: running.activityType.color,
           startedAt: running.startedAt,
         }

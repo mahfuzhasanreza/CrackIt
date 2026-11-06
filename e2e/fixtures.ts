@@ -47,6 +47,11 @@ export const USERS = {
     password: "resources-password-1234",
     name: "Resources User",
   },
+  notify: {
+    email: "e2e-notify@crackit.local",
+    password: "notify-password-1234",
+    name: "Notify User",
+  },
   journal: {
     email: "e2e-journal@crackit.local",
     password: "journal-password-1234",

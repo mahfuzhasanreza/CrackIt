@@ -17,7 +17,8 @@ const refs = {
 export const startTimerSchema = z.object({ ...refs, note });
 export type StartTimerInput = z.infer<typeof startTimerSchema>;
 
-export const stopTimerSchema = z.object({ focusRating, note });
+/** `entryId`: stop only that entry (a notification's Stop must never end a newer timer). */
+export const stopTimerSchema = z.object({ focusRating, note, entryId: optional(id) });
 export type StopTimerInput = z.infer<typeof stopTimerSchema>;
 
 /** Local wall-clock strings from <input type="datetime-local">; converted with the user's tz. */
