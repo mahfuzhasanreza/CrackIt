@@ -38,7 +38,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { title: "Problems", href: "/problems", icon: Code, ready: true },
       { title: "Projects", href: "/projects", icon: FolderGit2, ready: true },
       { title: "Lecturer", href: "/lecturer", icon: GraduationCap, ready: true },
-      { title: "Resources", href: "/resources", icon: BookOpen, ready: false },
+      { title: "Resources", href: "/resources", icon: BookOpen, ready: true },
     ],
   },
   {

@@ -170,6 +170,13 @@ UI (Server/Client Components)
   also has a "Move to" menu as the non-drag alternative.
 - Date keys as labels: `formatDateKey` from `@/lib/dates` (works on server and client).
 
+## Resources rules
+
+- Progress is counted in units (`completed_units` ≤ `total_units`; no total = open-ended).
+  `resources/rules.ts`: any progress starts a planned/dropped resource (`started_on`), reaching
+  the total marks it DONE (`finished_on`), dropping below re-opens it; a status picked by hand
+  wins (DONE fills the progress). DB CHECKs back the units and both dates.
+
 ## Charts & colors
 
 - Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark

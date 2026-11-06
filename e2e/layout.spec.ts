@@ -15,6 +15,7 @@ const PAGES = [
   "/lecturer",
   "/applications",
   "/interviews",
+  "/resources",
 ];
 
 test("sidebar stays put and the header matches it on every page", async ({ page }) => {

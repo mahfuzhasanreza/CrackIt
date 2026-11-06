@@ -26,6 +26,7 @@ async function main() {
     await prisma.course.deleteMany({ where: testUsers });
     await prisma.mockInterview.deleteMany({ where: testUsers });
     await prisma.organization.deleteMany({ where: testUsers }); // cascades applications
+    await prisma.resource.deleteMany({ where: testUsers });
     await prisma.tag.deleteMany({ where: testUsers });
     // Topics are re-seeded below, so edits from earlier runs are reset.
     await prisma.topic.deleteMany({ where: testUsers });
