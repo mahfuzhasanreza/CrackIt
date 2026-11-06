@@ -35,7 +35,7 @@ pnpm dev            # http://localhost:3000
 ```
 
 Set `AUTH_SECRET` in `.env` (`openssl rand -base64 32`). Log in as the seeded dev user
-`dev@crackit.local` / `crackit-dev-password`, or create your own account (there is no sign-up page):
+`dev@crackit.local` / `crackit-dev-password`, sign up at http://localhost:3000/register, or create an account from the CLI:
 
 ```bash
 pnpm user:create --email you@example.com --name "Your Name"   # prompts for a password (12+ chars)
@@ -69,8 +69,8 @@ One-time setup:
    `DATABASE_URL_UNPOOLED` (direct, used by migrations) for Production and every preview.
 3. **Env vars** (Vercel → Settings → Environment Variables, Production + Preview):
    `AUTH_SECRET` (`openssl rand -base64 32`; use a different value for Preview).
-4. **First user** (there's no sign-up page), from your machine:
-   `DATABASE_URL="<Neon direct URL>" pnpm user:create --email you@example.com`
+4. **First user**: sign up at `/register` (open to anyone, rate-limited per IP), or from your
+   machine: `DATABASE_URL="<Neon direct URL>" pnpm user:create --email you@example.com`
 5. **GitHub secrets** (Settings → Secrets and variables → Actions):
    - `BACKUP_DATABASE_URL`: the Neon production _direct_ URL, and `BACKUP_PASSPHRASE`: a long
      random passphrase (keep a copy in your password manager). Used by the nightly

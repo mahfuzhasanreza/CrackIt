@@ -27,10 +27,24 @@ test("profile, tracks and activity types", async ({ page }) => {
   await dialog.getByLabel("Name").fill("DevOps");
   await dialog.getByLabel("Weekly target (hours) (optional)").fill("3");
   await dialog.getByRole("radio", { name: "aqua" }).click();
+  await dialog
+    .getByLabel("Topics (optional)")
+    .fill("CI/CD\n  GitHub Actions\n  - Pipelines\nContainers\n  Docker");
+  await expect(dialog.getByText("5 topics")).toBeVisible();
   await dialog.getByRole("button", { name: "Save" }).click();
   await expect(page.getByText("Track added")).toBeVisible();
   const row = page.getByRole("listitem").filter({ hasText: "DevOps" });
-  await expect(row.getByText("3h 00m a week")).toBeVisible();
+  await expect(row.getByText("3h 00m a week · 5 topics")).toBeVisible();
+
+  // A bad outline is caught before saving; a template fills the box.
+  await page.getByRole("button", { name: "Add track" }).click();
+  await dialog.getByLabel("Topics (optional)").fill("Graphs\ngraphs");
+  await expect(
+    dialog.getByText("Line 2: “graphs” is listed twice at the same level."),
+  ).toBeVisible();
+  await dialog.getByRole("button", { name: "University Lecturer" }).click();
+  await expect(dialog.getByText(/^\d+ topics$/)).toBeVisible();
+  await page.keyboard.press("Escape");
 
   await page.getByRole("button", { name: "Actions for DevOps" }).click();
   await page.getByRole("menuitem", { name: "Edit" }).click();

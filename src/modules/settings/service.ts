@@ -61,9 +61,10 @@ export async function saveTrack(userId: string, input: TrackInput): Promise<Resu
     isActive: input.isActive,
   };
   if (!input.id) {
-    await repo.createTrack(userId, data);
+    await repo.createTrack(userId, data, input.topics);
     return ok(null);
   }
+  // Topics of an existing track are edited on the Topics page.
   return (await repo.updateTrack(userId, input.id, data))
     ? ok(null)
     : err("NOT_FOUND", "Track not found.");

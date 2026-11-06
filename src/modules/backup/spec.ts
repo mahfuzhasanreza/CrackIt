@@ -120,9 +120,12 @@ export const TABLE_LABEL: Record<TableKey, string> = {
 
 /**
  * Compile-time guard: adding a Prisma model fails typecheck until it's mapped to a backup table
- * here (and added to `TABLES` and `backup/repository.ts`). Users and login attempts aren't data.
+ * here (and added to `TABLES` and `backup/repository.ts`). Users and login / sign-up attempts aren't data.
  */
-export const MODEL_TABLE: Record<Exclude<Prisma.ModelName, "User" | "LoginAttempt">, TableKey> = {
+export const MODEL_TABLE: Record<
+  Exclude<Prisma.ModelName, "User" | "LoginAttempt" | "SignupAttempt">,
+  TableKey
+> = {
   Track: "tracks",
   Topic: "topics",
   ActivityType: "activityTypes",

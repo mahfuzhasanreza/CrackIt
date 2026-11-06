@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 
 import type { Prisma } from "@/generated/prisma/client";
 
+import type { DefaultTopic } from "../tracks-topics/defaults";
+
 // ── Profile & password ──────────────────────────────────────────────────────
 
 export function findProfile(userId: string) {
@@ -60,19 +62,37 @@ export function findTrackByName(userId: string, name: string, excludeId?: string
   });
 }
 
-export async function createTrack(
+/** A new track, last in order, with its topic tree, in one transaction. */
+export function createTrack(
   userId: string,
   data: Omit<Prisma.TrackUncheckedCreateInput, "userId" | "sortOrder">,
+  topics: DefaultTopic[] = [],
 ) {
-  const last = await db.track.findFirst({
-    where: { userId },
-    orderBy: { sortOrder: "desc" },
-    select: { sortOrder: true },
-  });
-  return db.track.create({
-    data: { ...data, userId, sortOrder: (last?.sortOrder ?? -1) + 1 },
-    select: { id: true },
-  });
+  return db.$transaction(
+    async (tx) => {
+      const last = await tx.track.findFirst({
+        where: { userId },
+        orderBy: { sortOrder: "desc" },
+        select: { sortOrder: true },
+      });
+      const track = await tx.track.create({
+        data: { ...data, userId, sortOrder: (last?.sortOrder ?? -1) + 1 },
+        select: { id: true },
+      });
+      const addLevel = async (nodes: DefaultTopic[], parentId: string | null) => {
+        for (const [sortOrder, t] of nodes.entries()) {
+          const topic = await tx.topic.create({
+            data: { userId, trackId: track.id, parentId, name: t.name, sortOrder },
+            select: { id: true },
+          });
+          if (t.children?.length) await addLevel(t.children, topic.id);
+        }
+      };
+      await addLevel(topics, null);
+      return track;
+    },
+    { timeout: 30_000 },
+  );
 }
 
 export async function updateTrack(

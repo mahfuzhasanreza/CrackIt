@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp, Ellipsis, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { startTransition, useState } from "react";
 
 import { FormField } from "@/components/form-field";
@@ -47,6 +48,7 @@ import type { ActivityTypeRow, TrackRow } from "../service";
 import { ACTIVITY_CATEGORIES } from "../validators";
 
 import { ColorChoice } from "./color-choice";
+import { TopicsField } from "./topics-field";
 
 export const CATEGORY_LABEL: Record<ActivityCategory, string> = {
   STUDY: "Study",
@@ -178,7 +180,7 @@ export function TracksSettings({ tracks }: { tracks: TrackRow[] }) {
         ))}
       </ul>
       <Dialog open={dialog?.kind.endsWith("track") ?? false} onOpenChange={(o) => !o && close()}>
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl">
           {dialog?.kind === "add-track" && (
             <TrackForm onDone={close} defaultColor={SERIES[tracks.length % SERIES.length]!.light} />
           )}
@@ -258,6 +260,17 @@ function TrackForm({
         />
       </FormField>
       <ColorChoice name="color" value={color} onChange={setColor} />
+      {track ? (
+        <p className="text-sm text-muted-foreground">
+          Edit this track&apos;s topics on the{" "}
+          <Link href="/topics" className="underline underline-offset-2 hover:text-foreground">
+            Topics
+          </Link>{" "}
+          page.
+        </p>
+      ) : (
+        <TopicsField error={err?.topics} />
+      )}
       <label className="flex items-center gap-2 text-sm">
         <input
           type="checkbox"

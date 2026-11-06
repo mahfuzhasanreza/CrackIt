@@ -12,6 +12,9 @@ async function main() {
   const prisma = createScriptClient();
   try {
     await prisma.loginAttempt.deleteMany();
+    await prisma.signupAttempt.deleteMany();
+    // Accounts made by the sign-up test (everything they own cascades).
+    await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-signup" } } });
     const testUsers = { user: { email: { in: Object.values(USERS).map((u) => u.email) } } };
     await prisma.timeEntry.deleteMany({ where: testUsers });
     await prisma.dailyLog.deleteMany({ where: testUsers });

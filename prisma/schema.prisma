@@ -121,6 +121,18 @@ model Topic {
   @@map("topics")
 }
 
+/// Every sign-up attempt, for per-IP rate limiting of open registration.
+model SignupAttempt {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  ip        String?
+  email     String // lower-cased input
+  success   Boolean
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([ip, createdAt])
+  @@map("signup_attempts")
+}
+
 /// Every login attempt, for rate limiting / lockout and auditing.
 model LoginAttempt {
   id        String   @id @default(uuid(7)) @db.Uuid

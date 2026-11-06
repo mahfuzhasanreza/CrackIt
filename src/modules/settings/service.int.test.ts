@@ -117,6 +117,33 @@ describe("settings", () => {
     expect((await deleteTrack(userId, devops.id)).ok).toBe(true);
   });
 
+  it("a new track can come with its topic outline", async () => {
+    const input = trackSchema.parse({
+      name: "Machine Learning",
+      color: "#6250d6",
+      isActive: "on",
+      topics:
+        "Foundations\n  Linear algebra\n  Probability\nModels\n  - Trees\n    Gradient boosting",
+    });
+    expect((await saveTrack(userId, input)).ok).toBe(true);
+    const track = (await listTracks(userId)).find((t) => t.name === "Machine Learning")!;
+    const topics = await db.topic.findMany({
+      where: { trackId: track.id },
+      orderBy: [{ sortOrder: "asc" }],
+    });
+    expect(topics).toHaveLength(6);
+    const byName = new Map(topics.map((t) => [t.name, t]));
+    expect(byName.get("Foundations")!.parentId).toBeNull();
+    expect(byName.get("Probability")!.parentId).toBe(byName.get("Foundations")!.id);
+    expect(byName.get("Probability")!.sortOrder).toBe(1);
+    expect(byName.get("Gradient boosting")!.parentId).toBe(byName.get("Trees")!.id);
+
+    // A bad outline is a field error and creates nothing.
+    const bad = trackSchema.safeParse({ name: "X", color: "#6250d6", topics: "A\na" });
+    expect(bad.success).toBe(false);
+    if (!bad.success) expect(bad.error.flatten().fieldErrors.topics?.[0]).toMatch(/listed twice/);
+  });
+
   it("deletes only unused activity types", async () => {
     const study = ctx.activity("Study");
     await db.timeEntry.create({
