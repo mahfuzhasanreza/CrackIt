@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert, LoaderCircle } from "lucide-react";
+import { CircleAlert, CircleCheck, LoaderCircle } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 
@@ -12,13 +12,21 @@ import { Label } from "@/components/ui/label";
 import { loginAction, type LoginState } from "../actions";
 
 export function LoginForm() {
-  const callbackUrl = useSearchParams().get("callbackUrl") ?? "";
+  const params = useSearchParams();
+  const callbackUrl = params.get("callbackUrl") ?? "";
+  const passwordChanged = params.get("password") === "changed";
   const [state, formAction, pending] = useActionState<LoginState, FormData>(loginAction, {});
 
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="callbackUrl" value={callbackUrl} />
 
+      {passwordChanged && !state.error && (
+        <Alert role="status">
+          <CircleCheck />
+          <AlertDescription>Password changed. Log in with your new one.</AlertDescription>
+        </Alert>
+      )}
       {state.error && (
         <Alert variant="destructive" role="alert">
           <CircleAlert />

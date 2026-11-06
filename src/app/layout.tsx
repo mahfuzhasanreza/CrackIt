@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { ServiceWorkerRegistration } from "@/components/pwa/service-worker";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
@@ -20,6 +21,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: { default: "CrackIt", template: "%s · CrackIt" },
   description: "Track every hour of interview prep — SWE and university lecturer.",
+  applicationName: "CrackIt",
+  appleWebApp: { capable: true, title: "CrackIt", statusBarStyle: "default" },
+  icons: { apple: "/icons/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -38,6 +49,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           <TooltipProvider delayDuration={150}>{children}</TooltipProvider>
           <Toaster />
+          <ServiceWorkerRegistration />
         </ThemeProvider>
       </body>
     </html>

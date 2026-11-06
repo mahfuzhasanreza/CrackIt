@@ -29,11 +29,15 @@ async function main() {
     await prisma.resource.deleteMany({ where: testUsers });
     await prisma.goal.deleteMany({ where: testUsers });
     await prisma.tag.deleteMany({ where: testUsers });
-    // Topics are re-seeded below, so edits from earlier runs are reset.
-    await prisma.topic.deleteMany({ where: testUsers });
+    // Tracks (with their topics) and activity types are re-seeded below, so edits from earlier
+    // runs (e.g. the settings tests) are reset.
+    await prisma.track.deleteMany({ where: testUsers });
+    await prisma.activityType.deleteMany({ where: testUsers });
     for (const u of Object.values(USERS)) {
       const data = {
         name: u.name,
+        timezone: "Asia/Dhaka",
+        dayStartHour: 4,
         passwordHash: await hashPassword(u.password),
         sessionVersion: 0,
       };

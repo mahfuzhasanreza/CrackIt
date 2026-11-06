@@ -4,6 +4,7 @@ import { Brand } from "@/components/app-shell/brand";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
+import { KeyboardShortcuts } from "@/components/shortcuts/keyboard-shortcuts";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserMenu } from "@/modules/auth/components/user-menu";
 import { HeaderTimer } from "@/modules/time-tracking/components/header-timer";
@@ -45,6 +46,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </header>
         <main className="min-w-0 flex-1 px-4 py-6 md:px-8">{children}</main>
       </div>
+      <KeyboardShortcuts />
     </div>
   );
 }

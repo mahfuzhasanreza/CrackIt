@@ -189,6 +189,25 @@ UI (Server/Client Components)
 - Goals (`goals` table): study minutes (optionally per track — DB CHECK), problems solved or
   learning notes, per day / week (Monday) / month. The form takes hours for study.
 
+## Settings, backup, PWA & shortcuts
+
+- `/settings?tab=general|tracks|activities|data`. Password change verifies the current one and
+  bumps `sessionVersion` (signs out everywhere), then redirects to `/login?password=changed`.
+  Activity types with time entries can't be deleted — archive them. Track/activity colors come
+  from the chart palette (`ColorChoice`).
+- Backup = `GET/POST /api/backup` (route handlers: no Server Action body limit). Format in
+  `backup/spec.ts` (`TABLES`, parents first). **Add every new user-owned table to `TABLES`,
+  `readAll`, `deleteAll` and `INSERT` in `backup/repository.ts`** — `MODEL_TABLE` in
+  `spec.ts` fails typecheck until you do; add a row to the round-trip test's `seed()` too. Import validates + remaps every id
+  (`remap.ts`) before deleting anything, then replaces in one transaction. CSV via
+  `/api/export/[kind]` with formula-injection escaping (`csv.ts`).
+- PWA: `app/manifest.ts`, icons in `public/icons` (`node scripts/generate-icons.mjs public/icons`),
+  `public/sw.js` only serves `/offline.html` when a navigation fails — never cache user data.
+- Shortcuts: `components/shortcuts/keymap.ts` (pure matcher) + `keyboard-shortcuts.tsx` (help on
+  `?`). Keys are ignored while typing, with modifiers, or when a dialog/menu is open.
+- E2E: Next keeps the previous page mounted (hidden) after client redirects; `page.reload()`
+  before asserting on a page reached by a redirect from a form.
+
 ## Charts & colors
 
 - Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark
