@@ -172,6 +172,13 @@ UI (Server/Client Components)
 - Kanban uses `@dnd-kit/core` (mouse, touch and keyboard sensors + announcements); every card
   also has a "Move to" menu as the non-drag alternative.
 - Date keys as labels: `formatDateKey` from `@/lib/dates` (works on server and client).
+- Interviews: results (passed / didn't pass) only once `scheduled_at` has passed (`outcomeError`);
+  pending + over = "needs an outcome" (`interviewBucket`). A new interview can create its
+  application inline (APPLIED today). Mocks may be in the future (scheduled) but are scored only
+  on/after their day. `/interviews?view=calendar&month=YYYY-MM`, detail at `/interviews/[id]`.
+- Server Components can only use a `"use client"` module's **components**: its other exports
+  (constants, helpers) are client references and come out `undefined` on the server. Put shared
+  constants/formatters in plain modules (`labels.ts`, `format.ts`).
 
 ## Resources rules
 

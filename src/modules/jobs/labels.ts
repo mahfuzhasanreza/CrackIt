@@ -38,3 +38,11 @@ export const ORG_TYPE_LABEL: Record<OrganizationType, string> = {
   COMPANY: "Company",
   UNIVERSITY: "University",
 };
+
+/** Badge style per outcome (server- and client-safe, unlike exports of client modules). */
+export const OUTCOME_BADGE: Record<InterviewOutcome, "default" | "secondary" | "outline"> = {
+  PENDING: "outline",
+  PASSED: "default",
+  FAILED: "secondary",
+  CANCELLED: "outline",
+};

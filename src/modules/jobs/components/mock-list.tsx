@@ -4,6 +4,7 @@ import { Ellipsis, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { Markdown } from "@/components/markdown";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
@@ -39,56 +40,77 @@ export function MockList({
         <p className="text-sm text-muted-foreground">Practice rounds with a partner or platform.</p>
         <Button variant="outline" onClick={() => setDialog({ kind: "add" })}>
           <Plus />
-          Log mock interview
+          Add mock interview
         </Button>
       </div>
       {mocks.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No mock interviews yet.</p>
+        <p className="text-sm text-muted-foreground">
+          No mock interviews yet. Schedule one ahead, or log one you just did.
+        </p>
       ) : (
         <ul className="flex flex-col divide-y rounded-xl border bg-card">
-          {mocks.map((m) => (
-            <li key={m.id} className="flex items-start justify-between gap-3 p-4">
-              <div className="flex min-w-0 flex-col gap-1">
-                <h3 className="font-medium">
-                  {ROUND_LABEL[m.type]}
-                  {m.partner && (
-                    <span className="font-normal text-muted-foreground"> · {m.partner}</span>
-                  )}
-                </h3>
-                <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
-                  <span>{formatDay(m.dateKey)}</span>
-                  {m.track && <span>{m.track.name}</span>}
-                  {m.score && <span>Score {m.score}/5</span>}
-                </p>
-                {m.feedbackMd.trim() && <Markdown className="mt-2">{m.feedbackMd}</Markdown>}
-              </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="size-8 shrink-0"
-                    aria-label={`Actions for mock ${ROUND_LABEL[m.type]} on ${formatDay(m.dateKey)}`}
-                  >
-                    <Ellipsis />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={() => setDialog({ kind: "edit", mock: m })}>
-                    <Pencil />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onSelect={() => setDialog({ kind: "delete", mock: m })}
-                  >
-                    <Trash2 />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </li>
-          ))}
+          {[...mocks]
+            // Scheduled (future) first, soonest first; then history, newest first.
+            .sort((a, b) => {
+              const fa = a.dateKey > today;
+              const fb = b.dateKey > today;
+              if (fa !== fb) return fa ? -1 : 1;
+              return fa ? a.dateKey.localeCompare(b.dateKey) : b.dateKey.localeCompare(a.dateKey);
+            })
+            .map((m) => {
+              const scheduled = m.dateKey > today;
+              const title = `${ROUND_LABEL[m.type]}${m.partner ? ` · ${m.partner}` : ""}`;
+              return (
+                <li
+                  key={m.id}
+                  aria-label={`Mock: ${title}`}
+                  className="flex items-start justify-between gap-3 p-4"
+                >
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <h3 className="flex flex-wrap items-center gap-2 font-medium">
+                      <span>
+                        {ROUND_LABEL[m.type]}
+                        {m.partner && (
+                          <span className="font-normal text-muted-foreground"> · {m.partner}</span>
+                        )}
+                      </span>
+                      {scheduled && <Badge variant="outline">Scheduled</Badge>}
+                    </h3>
+                    <p className="flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                      <span>{formatDay(m.dateKey, { weekday: "short" })}</span>
+                      {m.track && <span>{m.track.name}</span>}
+                      {m.score && <span>Score {m.score}/5</span>}
+                    </p>
+                    {m.feedbackMd.trim() && <Markdown className="mt-2">{m.feedbackMd}</Markdown>}
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0"
+                        aria-label={`Actions for mock ${ROUND_LABEL[m.type]} on ${formatDay(m.dateKey)}`}
+                      >
+                        <Ellipsis />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onSelect={() => setDialog({ kind: "edit", mock: m })}>
+                        <Pencil />
+                        {scheduled ? "Edit" : "Edit / score"}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onSelect={() => setDialog({ kind: "delete", mock: m })}
+                      >
+                        <Trash2 />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </li>
+              );
+            })}
         </ul>
       )}
       <Dialog open={dialog !== null} onOpenChange={(o) => !o && setDialog(null)}>
