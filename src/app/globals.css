@@ -155,3 +155,11 @@
     fill: var(--series-dark, var(--series));
   }
 }
+
+/* Scrollable but without a visible scrollbar (tab rows that swipe sideways on phones). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

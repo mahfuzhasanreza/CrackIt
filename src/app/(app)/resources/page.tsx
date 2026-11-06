@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { TabNav } from "@/components/tab-nav";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { requireUser } from "@/modules/auth/dal";
 import { AddResourceButton, ResourceList } from "@/modules/resources/components/resource-list";
 import { getResourcesPage } from "@/modules/resources/service";
@@ -75,23 +74,15 @@ async function ResourcesContent({ searchParams }: Pick<PageProps<"/resources">, 
         <AddResourceButton tracks={trackChoices} />
       </header>
 
-      <nav aria-label="Resource views" className="flex gap-1 overflow-x-auto border-b">
-        {(Object.keys(VIEWS) as (keyof typeof VIEWS)[]).map((id) => (
-          <Link
-            key={id}
-            href={id === "active" ? "/resources" : `/resources?view=${id}`}
-            aria-current={view === id ? "page" : undefined}
-            className={cn(
-              "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm whitespace-nowrap",
-              view === id
-                ? "border-foreground font-medium"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {VIEWS[id].label} ({tabCount[id]})
-          </Link>
-        ))}
-      </nav>
+      <TabNav
+        label="Resource views"
+        current={view}
+        items={(Object.keys(VIEWS) as (keyof typeof VIEWS)[]).map((id) => ({
+          id,
+          label: `${VIEWS[id].label} (${tabCount[id]})`,
+          href: id === "active" ? "/resources" : `/resources?view=${id}`,
+        }))}
+      />
 
       <ResourceList resources={shown} tracks={trackChoices} emptyText={VIEWS[view].empty} />
     </>

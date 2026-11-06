@@ -41,6 +41,9 @@ UI (Server/Client Components)
 - Routes live in `src/app/` and stay thin: fetch via services, render module components.
 - Shared helpers: `src/lib/` (`env.ts`, `db.ts`, `result.ts`, `utils.ts`, later `dates.ts`).
 - Shared UI primitives: `src/components/ui/` (shadcn — add with `pnpm dlx shadcn@latest add <name>`).
+- Page tabs (`?tab=` / `?view=` links): use `<TabNav>` from `@/components/tab-nav`. Don't build
+  ad-hoc tab rows with `-mb-px` underlines inside `overflow-x-auto`: the 1px overhang makes the
+  row scroll vertically and shows scrollbar arrows (the layout e2e checks `main nav` for this).
 - Actions and services return `Result<T>` from `@/lib/result` (`ok(...)` / `err(code, msg)`);
   throw only for truly unexpected errors.
 - Every table has `userId`, `createdAt`, `updatedAt`; every query filters by `userId`.
