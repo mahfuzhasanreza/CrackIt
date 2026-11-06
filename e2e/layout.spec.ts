@@ -22,6 +22,8 @@ const PAGES = [
   "/settings",
   "/settings?tab=tracks",
   "/settings?tab=data",
+  "/resources?view=done",
+  "/applications?view=organizations",
 ];
 
 test("sidebar stays put and the header matches it on every page", async ({ page }) => {
@@ -63,6 +65,15 @@ for (const width of [360, 768, 1024]) {
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       );
       expect(overflow, path).toBeLessThanOrEqual(0);
+
+      // Tab bars may swipe sideways but must never overflow vertically: that shows stray
+      // scrollbar arrows on systems with classic scrollbars.
+      const tallNavs = await page.evaluate(() =>
+        [...document.querySelectorAll("main nav")]
+          .filter((n) => n.scrollHeight > n.clientHeight)
+          .map((n) => n.getAttribute("aria-label")),
+      );
+      expect(tallNavs, path).toEqual([]);
     }
   });
 }

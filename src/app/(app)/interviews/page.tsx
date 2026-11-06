@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TabNav } from "@/components/tab-nav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { parseMonthKey } from "@/lib/calendar";
 import { toDateKey } from "@/lib/dates";
-import { cn } from "@/lib/utils";
 import { requireUser } from "@/modules/auth/dal";
 import { InterviewCalendar } from "@/modules/jobs/components/interview-calendar";
 import { AddInterviewButton, InterviewList } from "@/modules/jobs/components/interview-list";
@@ -61,28 +60,14 @@ async function InterviewsContent({ searchParams }: Pick<PageProps<"/interviews">
 
       <Stats stats={page.stats} upcoming={page.upcoming.length} />
 
-      <nav aria-label="Interview views" className="flex gap-1 border-b">
-        {(
-          [
-            ["list", "List", "/interviews"],
-            ["calendar", "Calendar", "/interviews?view=calendar"],
-          ] as const
-        ).map(([id, label, href]) => (
-          <Link
-            key={id}
-            href={href}
-            aria-current={view === id ? "page" : undefined}
-            className={cn(
-              "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm",
-              view === id
-                ? "border-foreground font-medium"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <TabNav
+        label="Interview views"
+        current={view}
+        items={[
+          { id: "list", label: "List", href: "/interviews" },
+          { id: "calendar", label: "Calendar", href: "/interviews?view=calendar" },
+        ]}
+      />
 
       {view === "calendar" ? (
         <InterviewCalendar

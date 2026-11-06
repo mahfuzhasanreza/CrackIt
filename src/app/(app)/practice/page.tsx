@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { TabNav } from "@/components/tab-nav";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { requireUser } from "@/modules/auth/dal";
 import { PresentationsTab, QuestionsTab } from "@/modules/practice/components/practice-lists";
 import { getPracticePage } from "@/modules/practice/service";
@@ -86,28 +85,16 @@ async function PracticeContent({ searchParams }: Pick<PageProps<"/practice">, "s
         ))}
       </dl>
 
-      <nav aria-label="Practice sections" className="flex gap-1 overflow-x-auto border-b">
-        {TABS.map((t) => (
-          <Link
-            key={t.id}
-            href={t.id === "questions" ? "/practice" : `/practice?tab=${t.id}`}
-            aria-current={tab === t.id ? "page" : undefined}
-            className={cn(
-              "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm whitespace-nowrap",
-              tab === t.id
-                ? "border-foreground font-medium"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {t.label}
-            {t.id === "questions" && summary.due > 0 && (
-              <span className="ml-1.5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground tabular-nums">
-                {summary.due}
-              </span>
-            )}
-          </Link>
-        ))}
-      </nav>
+      <TabNav
+        label="Practice sections"
+        current={tab}
+        items={TABS.map((t) => ({
+          id: t.id,
+          label: t.label,
+          href: t.id === "questions" ? "/practice" : `/practice?tab=${t.id}`,
+          badge: t.id === "questions" ? summary.due : undefined,
+        }))}
+      />
 
       {tab === "questions" && (
         <QuestionsTab questions={data.questions} tracks={tracks} today={data.today} />

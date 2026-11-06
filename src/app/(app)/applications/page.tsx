@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
+import { TabNav } from "@/components/tab-nav";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import { requireUser } from "@/modules/auth/dal";
 import { AddApplicationButton } from "@/modules/jobs/components/add-application-button";
 import { KanbanBoard } from "@/modules/jobs/components/kanban-board";
@@ -51,28 +50,18 @@ async function ApplicationsContent({
         <AddApplicationButton organizations={orgNames} tracks={trackChoices} today={board.today} />
       </header>
 
-      <nav aria-label="Applications views" className="flex gap-1 border-b">
-        {(
-          [
-            ["board", "Board"],
-            ["organizations", `Organizations (${orgs.length})`],
-          ] as const
-        ).map(([id, label]) => (
-          <Link
-            key={id}
-            href={id === "board" ? "/applications" : "/applications?view=organizations"}
-            aria-current={view === id ? "page" : undefined}
-            className={cn(
-              "-mb-px shrink-0 border-b-2 px-3 py-2 text-sm whitespace-nowrap",
-              view === id
-                ? "border-foreground font-medium"
-                : "border-transparent text-muted-foreground hover:text-foreground",
-            )}
-          >
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <TabNav
+        label="Applications views"
+        current={view}
+        items={[
+          { id: "board", label: "Board", href: "/applications" },
+          {
+            id: "organizations",
+            label: `Organizations (${orgs.length})`,
+            href: "/applications?view=organizations",
+          },
+        ]}
+      />
 
       {view === "board" ? (
         <KanbanBoard
