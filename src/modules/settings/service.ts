@@ -4,6 +4,8 @@ import { err, ok, type Result } from "@/lib/result";
 
 import { hashPassword, verifyPassword } from "../auth/password";
 
+import { DEFAULT_TRACKS } from "../tracks-topics/defaults";
+
 import { moved } from "./order";
 import * as repo from "./repository";
 import type {
@@ -68,6 +70,27 @@ export async function saveTrack(userId: string, input: TrackInput): Promise<Resu
   return (await repo.updateTrack(userId, input.id, data))
     ? ok(null)
     : err("NOT_FOUND", "Track not found.");
+}
+
+/** Add one of the starter templates (track + its topic roadmap) as the user's own track. */
+export async function addTemplateTrack(userId: string, name: string): Promise<Result<null>> {
+  const template = DEFAULT_TRACKS.find((t) => t.name === name);
+  if (!template) return err("NOT_FOUND", "Unknown template.");
+  if (await repo.findTrackByName(userId, template.name)) {
+    return err("CONFLICT", `You already have a track called “${template.name}”.`);
+  }
+  await repo.createTrack(
+    userId,
+    {
+      name: template.name,
+      description: template.description,
+      color: template.color,
+      weeklyTargetMinutes: template.weeklyTargetMinutes,
+      isActive: true,
+    },
+    template.topics,
+  );
+  return ok(null);
 }
 
 /** Deletes the track and its topics; time entries, notes and applications keep their history. */

@@ -23,6 +23,7 @@ import { WeekGoals } from "@/modules/dashboard/components/week-goals";
 import { getDashboard, getRevisionDue } from "@/modules/dashboard/service";
 import { ROUND_LABEL } from "@/modules/jobs/labels";
 import { getUpcomingInterviews } from "@/modules/jobs/service";
+import { TrackSetup } from "@/modules/settings/components/track-setup";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -72,6 +73,8 @@ async function DashboardContent() {
           </Link>
         </Button>
       </header>
+
+      {data.tracks.length === 0 && <TrackSetup />}
 
       <StatTiles data={data} />
 

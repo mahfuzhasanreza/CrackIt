@@ -11,6 +11,7 @@ import { requireUser } from "@/modules/auth/dal";
 import { RoadmapTree, StatusDot } from "@/modules/tracks-topics/components/roadmap-tree";
 import { STATUS_LABEL, TOPIC_STATUSES } from "@/modules/tracks-topics/roadmap";
 import { getRoadmap } from "@/modules/tracks-topics/service";
+import { TrackSetup } from "@/modules/settings/components/track-setup";
 
 export const metadata: Metadata = { title: "Topics" };
 
@@ -41,7 +42,7 @@ async function TopicsContent({ searchParams }: Pick<PageProps<"/topics">, "searc
       </header>
 
       {!track ? (
-        <p className="text-sm text-muted-foreground">No active tracks.</p>
+        <TrackSetup />
       ) : (
         <>
           <nav aria-label="Tracks" className="flex flex-wrap gap-2">

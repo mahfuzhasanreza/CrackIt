@@ -18,7 +18,7 @@ const input = (email = `signup-${randomUUID()}@crackit.local`) =>
   });
 
 describe("registration", () => {
-  it("creates the account with the starter tracks, topics and activities", async () => {
+  it("creates the account with activity types but no tracks (users pick their own)", async () => {
     const data = input();
     const result = await registerUser(data, null);
     expect(result.ok).toBe(true);
@@ -28,8 +28,8 @@ describe("registration", () => {
     expect(user.email).toBe(data.email.toLowerCase());
     expect(user.name).toBe("New Person");
     expect(await verifyPassword(user.passwordHash!, "a-long-password-1")).toBe(true);
-    expect(await db.track.count({ where: { userId: user.id } })).toBe(2);
-    expect(await db.topic.count({ where: { userId: user.id } })).toBeGreaterThan(20);
+    expect(await db.track.count({ where: { userId: user.id } })).toBe(0);
+    expect(await db.topic.count({ where: { userId: user.id } })).toBe(0);
     expect(await db.activityType.count({ where: { userId: user.id } })).toBeGreaterThan(5);
   });
 

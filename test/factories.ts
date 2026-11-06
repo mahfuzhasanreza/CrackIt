@@ -8,7 +8,7 @@ export async function createTestUser(overrides: { timezone?: string; dayStartHou
   const user = await db.user.create({
     data: { email: `test-${randomUUID()}@crackit.local`, name: "Test", ...overrides },
   });
-  await seedDefaultsForUser(db, user.id);
+  await seedDefaultsForUser(db, user.id, { starterTracks: true });
   const [activityTypes, tracks, topics] = await Promise.all([
     db.activityType.findMany({ where: { userId: user.id } }),
     db.track.findMany({ where: { userId: user.id } }),

@@ -40,7 +40,8 @@ export default function SettingsPage({ searchParams }: PageProps<"/settings">) {
 
 async function SettingsContent({ searchParams }: Pick<PageProps<"/settings">, "searchParams">) {
   const user = await requireUser();
-  const raw = (await searchParams).tab;
+  const params = await searchParams;
+  const raw = params.tab;
   const tab: Tab = typeof raw === "string" && raw in TABS ? (raw as Tab) : "general";
 
   return (
@@ -75,7 +76,9 @@ async function SettingsContent({ searchParams }: Pick<PageProps<"/settings">, "s
       </nav>
 
       {tab === "general" && <General userId={user.id} />}
-      {tab === "tracks" && <TracksSettings tracks={await listTracks(user.id)} />}
+      {tab === "tracks" && (
+        <TracksSettings tracks={await listTracks(user.id)} openAdd={params.add === "1"} />
+      )}
       {tab === "activities" && <ActivitySettings activities={await listActivityTypes(user.id)} />}
       {tab === "data" && <DataSettings />}
     </>

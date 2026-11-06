@@ -33,7 +33,7 @@ async function main() {
     });
     console.log(`Set dev password for ${email}`);
   }
-  await seedDefaultsForUser(prisma, user.id);
+  await seedDefaultsForUser(prisma, user.id, { starterTracks: true });
 
   const [tracks, topics, activityTypes] = await Promise.all([
     prisma.track.count({ where: { userId: user.id } }),

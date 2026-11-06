@@ -13,6 +13,7 @@ import {
   moveSchema,
   passwordChangeSchema,
   profileSchema,
+  templateSchema,
   trackSchema,
 } from "./validators";
 
@@ -50,6 +51,19 @@ export async function saveTrackAction(
   return toActionState(
     await service.saveTrack(user.id, parsed.data),
     parsed.data.id ? "Track saved" : "Track added",
+  );
+}
+
+export async function addTemplateTrackAction(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
+  const user = await requireUser();
+  const parsed = templateSchema.safeParse(formFields(formData));
+  if (!parsed.success) return invalidState(parsed.error.flatten().fieldErrors);
+  return toActionState(
+    await service.addTemplateTrack(user.id, parsed.data.name),
+    `Added “${parsed.data.name}”`,
   );
 }
 

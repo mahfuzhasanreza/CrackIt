@@ -73,8 +73,10 @@ UI (Server/Client Components)
 
 - Auth.js v5 Credentials, JWT sessions (`src/auth.ts`); logic in `src/modules/auth/`.
 - Open sign-up at `/register` (`auth/registration.ts`): 5 attempts per IP per hour
-  (`signup_attempts`), new users get the starter tracks/topics/activities, then are signed in.
-  `pnpm user:create` still works for scripted accounts.
+  (`signup_attempts`), new users get the default activity types but **no tracks** — tracks are
+  each user's own targets. A setup card (`settings/components/track-setup.tsx`, on the
+  dashboard / topics / settings when there are no tracks) offers "Create my own" or a starter
+  template (`addTemplateTrack`). `pnpm user:create [--starter-tracks]` for scripted accounts.
 - `src/proxy.ts` only does optimistic redirects (signed JWT present). `/login` is always
   reachable so a stale JWT can't cause a redirect loop.
 - Authoritative check = DAL: `getCurrentUser()` / `requireUser()` from `@/modules/auth/dal`
@@ -100,7 +102,8 @@ UI (Server/Client Components)
   `@@unique`/`@@index` in the schema when one exists so Prisma doesn't see drift, and verify with
   `pnpm exec prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma`.
 - Default tracks/topics/activity types are data in `src/modules/*/defaults.ts`; seeding logic is
-  `prisma/seed-defaults.ts` (idempotent).
+  `prisma/seed-defaults.ts` (idempotent). Starter tracks are opt-in (`{ starterTracks: true }`):
+  dev seed, tests and e2e fixtures use them; sign-ups don't.
 
 ## Testing
 

@@ -34,6 +34,7 @@ import type { ActivityCategory } from "@/generated/prisma/enums";
 import { useToastAction } from "@/hooks/use-toast-action";
 import { formatDuration } from "@/lib/dates";
 import { SERIES, seriesVars } from "@/lib/palette";
+import { cn } from "@/lib/utils";
 
 import { useNoResetSubmit } from "../../time-tracking/components/hooks";
 import {
@@ -49,6 +50,7 @@ import { ACTIVITY_CATEGORIES } from "../validators";
 
 import { ColorChoice } from "./color-choice";
 import { TopicsField } from "./topics-field";
+import { TrackSetup } from "./track-setup";
 
 export const CATEGORY_LABEL: Record<ActivityCategory, string> = {
   STUDY: "Study",
@@ -132,8 +134,15 @@ function Swatch({ color }: { color: string }) {
   );
 }
 
-export function TracksSettings({ tracks }: { tracks: TrackRow[] }) {
-  const [dialog, setDialog] = useState<Dialogs | null>(null);
+export function TracksSettings({
+  tracks,
+  openAdd = false,
+}: {
+  tracks: TrackRow[];
+  openAdd?: boolean;
+}) {
+  // "Create my own track" from the setup card lands here with the form open.
+  const [dialog, setDialog] = useState<Dialogs | null>(openAdd ? { kind: "add-track" } : null);
   const close = () => setDialog(null);
   return (
     <section aria-labelledby="tracks-heading" className="flex flex-col gap-4">
@@ -151,7 +160,8 @@ export function TracksSettings({ tracks }: { tracks: TrackRow[] }) {
           Add track
         </Button>
       </div>
-      <ul className="divide-y rounded-xl border bg-card">
+      {tracks.length === 0 && <TrackSetup />}
+      <ul className={cn("divide-y rounded-xl border bg-card", tracks.length === 0 && "hidden")}>
         {tracks.map((t, i) => (
           <li key={t.id} className="flex items-center gap-3 px-4 py-3">
             <Swatch color={t.color} />

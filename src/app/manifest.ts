@@ -6,7 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     id: "/",
     name: "CrackIt — interview prep tracker",
     short_name: "CrackIt",
-    description: "Track every hour of interview prep — SWE and university lecturer.",
+    description: "Track every hour of interview prep, for whatever you are preparing for.",
     start_url: "/dashboard",
     scope: "/",
     display: "standalone",

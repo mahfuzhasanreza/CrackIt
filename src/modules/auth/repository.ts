@@ -56,7 +56,7 @@ export async function recordSignupAttempt(attempt: {
   await db.signupAttempt.create({ data: attempt });
 }
 
-/** New user with the starter tracks, topics and activity types (same as `pnpm user:create`). */
+/** New user with the default activity types; tracks are theirs to choose (no starter tracks). */
 export async function createUserWithDefaults(data: {
   email: string;
   name: string | null;

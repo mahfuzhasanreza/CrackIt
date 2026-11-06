@@ -6,6 +6,7 @@ import { createTestUser } from "../../../test/factories";
 import { hashPassword, verifyPassword } from "../auth/password";
 
 import {
+  addTemplateTrack,
   changePassword,
   deleteActivityType,
   deleteTrack,
@@ -142,6 +143,22 @@ describe("settings", () => {
     const bad = trackSchema.safeParse({ name: "X", color: "#6250d6", topics: "A\na" });
     expect(bad.success).toBe(false);
     if (!bad.success) expect(bad.error.flatten().fieldErrors.topics?.[0]).toMatch(/listed twice/);
+  });
+
+  it("adds a starter template as the user's own track, once", async () => {
+    const fresh = (await createTestUser()).user.id;
+    await db.track.deleteMany({ where: { userId: fresh } }); // like a new sign-up
+    expect((await addTemplateTrack(fresh, "University Lecturer")).ok).toBe(true);
+    const [track] = await listTracks(fresh);
+    expect(track).toMatchObject({ name: "University Lecturer", isActive: true });
+    expect(track!._count.topics).toBeGreaterThan(5);
+    expect(await db.topic.count({ where: { trackId: track!.id, parentId: null } })).toBeGreaterThan(
+      1,
+    );
+
+    const again = await addTemplateTrack(fresh, "University Lecturer");
+    expect(!again.ok && again.error.code).toBe("CONFLICT");
+    expect((await addTemplateTrack(fresh, "Astronaut")).ok).toBe(false);
   });
 
   it("deletes only unused activity types", async () => {
