@@ -9,6 +9,7 @@ import { DataSettings } from "@/modules/backup/components/data-settings";
 import { PasswordForm, ProfileForm } from "@/modules/settings/components/general-settings";
 import { ActivitySettings, TracksSettings } from "@/modules/settings/components/tracks-settings";
 import { getProfile, listActivityTypes, listTracks } from "@/modules/settings/service";
+import { TimerNotificationSetting } from "@/modules/time-tracking/components/timer-notification-setting";
 
 export const metadata: Metadata = { title: "Settings" };
 
@@ -82,6 +83,7 @@ async function General({ userId }: { userId: string }) {
   return (
     <div className="flex flex-col gap-6">
       <ProfileForm profile={profile} timeZones={Intl.supportedValuesOf("timeZone")} />
+      <TimerNotificationSetting />
       <PasswordForm />
     </div>
   );

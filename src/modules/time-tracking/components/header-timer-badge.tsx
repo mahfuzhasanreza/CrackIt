@@ -9,28 +9,38 @@ import { Button } from "@/components/ui/button";
 import { initialActionState } from "@/lib/action-state";
 import { stopTimerAction } from "../actions";
 
+import type { RunningTimer } from "../notification";
+
 import { Elapsed } from "./elapsed";
 import { useActionFeedback } from "./hooks";
+import { TimerNotification } from "./timer-notification";
 
-type Running = { name: string; color: string; startedAt: Date } | null;
+type Running = (RunningTimer & { color: string }) | null;
 
 export function HeaderTimerBadge({ running, serverNow }: { running: Running; serverNow: Date }) {
   const [state, action, pending] = useActionState(stopTimerAction, initialActionState);
   useActionFeedback(state);
 
+  // Phone notification (opt-in per device in Settings) follows the same running entry.
+  const notification = <TimerNotification running={running} />;
+
   if (!running) {
     return (
-      <Button asChild variant="outline" size="sm">
-        <Link href="/timer">
-          <Play />
-          {/* Icon-only on the narrowest phones; the name stays for screen readers. */}
-          <span className="sr-only sm:not-sr-only">Start timer</span>
-        </Link>
-      </Button>
+      <>
+        {notification}
+        <Button asChild variant="outline" size="sm">
+          <Link href="/timer">
+            <Play />
+            {/* Icon-only on the narrowest phones; the name stays for screen readers. */}
+            <span className="sr-only sm:not-sr-only">Start timer</span>
+          </Link>
+        </Button>
+      </>
     );
   }
   return (
     <div className="flex items-center gap-1 rounded-full border py-0.5 pr-0.5 pl-3 text-sm">
+      {notification}
       <Link
         href="/timer"
         className="flex items-center gap-2"

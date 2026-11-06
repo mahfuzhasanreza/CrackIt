@@ -27,6 +27,7 @@ const PAGES = [
 ];
 
 test("sidebar stays put and the header matches it on every page", async ({ page }) => {
+  test.setTimeout(60_000); // 20 pages; slow under a full parallel run
   await page.setViewportSize({ width: 1280, height: 700 });
   await logInAs(page, USERS.main);
   for (const path of PAGES) {

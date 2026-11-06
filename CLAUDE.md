@@ -225,6 +225,13 @@ UI (Server/Client Components)
   `/api/export/[kind]` with formula-injection escaping (`csv.ts`).
 - PWA: `app/manifest.ts`, icons in `public/icons` (`node scripts/generate-icons.mjs public/icons`),
   `public/sw.js` only serves `/offline.html` when a navigation fails — never cache user data.
+- Timer notification (phones only, opt-in per device in Settings → General, stored in
+  localStorage): `time-tracking/notification.ts` (content, support check) +
+  `components/timer-notification*.tsx|ts` (the header keeps it in sync on every page).
+  `public/sw.js` handles taps: Stop → `POST /api/timer/stop { entryId }`, which stops only
+  that entry (409 if another timer runs now). No live counter and no Web Push: a timer stopped
+  on another device clears the phone's notification next time the app opens there. E2E needs
+  full Chromium (`channel: "chromium"`): the headless shell reports notifications as denied.
 - Shortcuts: `components/shortcuts/keymap.ts` (pure matcher) + `keyboard-shortcuts.tsx` (help on
   `?`). Keys are ignored while typing, with modifiers, or when a dialog/menu is open.
 - E2E: Next keeps the previous page mounted (hidden) after client redirects; `page.reload()`

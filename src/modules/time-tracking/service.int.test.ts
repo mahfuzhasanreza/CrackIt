@@ -107,6 +107,26 @@ describe("timer", () => {
     expect(!r.ok && r.error.code).toBe("VALIDATION");
   });
 
+  it("stopping a specific entry never stops a newer one", async () => {
+    const first = await startTimer(ctx.user.id, studyRefs, at("2026-11-05T03:00:00Z"));
+    const second = await startTimer(
+      ctx.user.id,
+      { activityTypeId: ctx.activity("Break / Gap").id },
+      at("2026-11-05T04:00:00Z"),
+    );
+    const stale = await stopTimer(ctx.user.id, { entryId: first.ok ? first.data.id : "" });
+    expect(!stale.ok && stale.error.code).toBe("CONFLICT");
+    expect((await getRunningEntry(ctx.user.id))?.id).toBe(second.ok && second.data.id);
+
+    const current = await stopTimer(
+      ctx.user.id,
+      { entryId: second.ok ? second.data.id : "" },
+      at("2026-11-05T04:30:00Z"),
+    );
+    expect(current.ok).toBe(true);
+    expect(await getRunningEntry(ctx.user.id)).toBeNull();
+  });
+
   it("stopping with nothing running is NOT_FOUND", async () => {
     const r = await stopTimer(ctx.user.id, {});
     expect(!r.ok && r.error.code).toBe("NOT_FOUND");
