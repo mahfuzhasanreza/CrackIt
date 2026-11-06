@@ -35,3 +35,19 @@ export function darkOf(hex: string): string {
 export function seriesVars(light: string, dark = darkOf(light)): React.CSSProperties {
   return { "--series": light, "--series-dark": dark } as React.CSSProperties;
 }
+
+/** Accent for single-series charts (no legend needed: the title names the series). */
+export const ACCENT = SERIES[0];
+
+/**
+ * Sequential blue for the study heatmap, levels 1–4 (level 0 = no study, muted surface).
+ * Validated as ordinal ramps: light steps 250/400/500/650 (light end 2.06:1 on the light
+ * surface), dark steps 600/500/400/250 (dark end 2.15:1 on the dark surface) — more is
+ * darker in light mode and brighter in dark mode.
+ */
+export const HEAT = [
+  { light: "#86b6ef", dark: "#184f95" },
+  { light: "#3987e5", dark: "#256abf" },
+  { light: "#256abf", dark: "#3987e5" },
+  { light: "#104281", dark: "#86b6ef" },
+] as const;

@@ -177,6 +177,18 @@ UI (Server/Client Components)
   the total marks it DONE (`finished_on`), dropping below re-opens it; a status picked by hand
   wins (DONE fills the progress). DB CHECKs back the units and both dates.
 
+## Analytics & goals rules
+
+- `/analytics?range=7d|30d|90d|12m` (default 30d). Aggregations are pure in
+  `analytics/compute.ts`; `analytics/service.ts` loads everything in one pass. Buckets: daily up
+  to 30 days, weekly for 90, monthly for 12 months. KPIs compare against the previous range of
+  the same length.
+- Sleep is per night, keyed by the wake-up day; tracked sleep wins over journal bed/wake times.
+  Focus is weighted by session length. The funnel counts the furthest stage an application ever
+  reached for every earlier stage too.
+- Goals (`goals` table): study minutes (optionally per track — DB CHECK), problems solved or
+  learning notes, per day / week (Monday) / month. The form takes hours for study.
+
 ## Charts & colors
 
 - Series colors come from `src/lib/palette.ts` (validated categorical palette, light + dark
@@ -184,6 +196,10 @@ UI (Server/Client Components)
   `border-series` utilities so dark mode uses the dark step.
 - Text never uses a series color; every chart has a legend (≥2 series), hover/focus tooltips,
   and a table view. Run the dataviz palette validator before adding new chart colors.
+- Shared charts live in `src/components/charts/` (`ColumnChart` + `TableView`, client
+  `LineChart` with crosshair + arrow keys, `niceTicks`). Heatmap levels use the validated `HEAT`
+  ramp; single-series charts use `ACCENT`, sleep uses `SLEEP`. SVG marks: `stroke-series` /
+  `fill-series`.
 
 ## Rules
 

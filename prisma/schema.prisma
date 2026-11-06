@@ -51,6 +51,7 @@ model User {
   interviews               Interview[]
   mockInterviews           MockInterview[]
   resources                Resource[]
+  goals                    Goal[]
 
   @@map("users")
 }
@@ -76,6 +77,7 @@ model Track {
   applications    Application[]
   mockInterviews  MockInterview[]
   resources       Resource[]
+  goals           Goal[]
 
   @@unique([userId, name])
   @@map("tracks")
@@ -792,4 +794,44 @@ model Resource {
 
   @@index([userId, status])
   @@map("resources")
+}
+
+// ─── Goals ───────────────────────────────────────────────────────────────────
+
+enum GoalMetric {
+  STUDY_MINUTES
+  PROBLEMS_SOLVED
+  LEARNING_ENTRIES
+
+  @@map("goal_metric")
+}
+
+enum GoalPeriod {
+  DAY
+  WEEK
+  MONTH
+
+  @@map("goal_period")
+}
+
+/// A target per period, e.g. "10h of SWE study a week" or "5 problems a day".
+model Goal {
+  id        String     @id @default(uuid(7)) @db.Uuid
+  userId    String     @map("user_id") @db.Uuid
+  /// Only for STUDY_MINUTES (DB CHECK); NULL = all study.
+  trackId   String?    @map("track_id") @db.Uuid
+  metric    GoalMetric
+  period    GoalPeriod
+  /// Minutes for STUDY_MINUTES, a count otherwise.
+  target    Int
+  startsOn  DateTime   @map("starts_on") @db.Date
+  endsOn    DateTime?  @map("ends_on") @db.Date
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  track Track? @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("goals")
 }

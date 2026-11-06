@@ -22,6 +22,11 @@ export const USERS = {
     name: "Lecturer User",
   },
   jobs: { email: "e2e-jobs@crackit.local", password: "jobs-password-1234", name: "Jobs User" },
+  analytics: {
+    email: "e2e-analytics@crackit.local",
+    password: "analytics-password-1234",
+    name: "Analytics User",
+  },
   resources: {
     email: "e2e-resources@crackit.local",
     password: "resources-password-1234",
