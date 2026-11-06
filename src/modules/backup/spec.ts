@@ -7,7 +7,8 @@
 import type { Prisma } from "@/generated/prisma/client";
 
 export const BACKUP_APP = "crackit";
-export const BACKUP_VERSION = 1;
+/** 2: courses/publications removed; viva questions → practiceQuestions, demos → presentations. */
+export const BACKUP_VERSION = 2;
 
 export type TableSpec = {
   key: string;
@@ -58,10 +59,8 @@ export const TABLES = [
     refs: { problemId: "problems", tagId: "tags" },
   },
   { key: "projects", hasId: true, owned: true, refs: {} },
-  { key: "courses", hasId: true, owned: true, refs: {} },
-  { key: "teachingDemos", hasId: true, owned: true, refs: { courseId: "courses" } },
-  { key: "publications", hasId: true, owned: true, refs: {} },
-  { key: "vivaQuestions", hasId: true, owned: true, refs: { courseId: "courses" } },
+  { key: "practiceQuestions", hasId: true, owned: true, refs: { trackId: "tracks" } },
+  { key: "presentations", hasId: true, owned: true, refs: { trackId: "tracks" } },
   { key: "organizations", hasId: true, owned: true, refs: {} },
   {
     key: "applications",
@@ -105,10 +104,8 @@ export const TABLE_LABEL: Record<TableKey, string> = {
   problems: "Problems",
   problemTags: "Problem tags",
   projects: "Projects",
-  courses: "Courses",
-  teachingDemos: "Teaching demos",
-  publications: "Publications",
-  vivaQuestions: "Viva questions",
+  practiceQuestions: "Practice questions",
+  presentations: "Presentations",
   organizations: "Organizations",
   applications: "Applications",
   applicationEvents: "Application history",
@@ -140,10 +137,8 @@ export const MODEL_TABLE: Record<
   Problem: "problems",
   ProblemTag: "problemTags",
   Project: "projects",
-  Course: "courses",
-  TeachingDemo: "teachingDemos",
-  Publication: "publications",
-  VivaQuestion: "vivaQuestions",
+  PracticeQuestion: "practiceQuestions",
+  Presentation: "presentations",
   Organization: "organizations",
   Application: "applications",
   ApplicationEvent: "applicationEvents",

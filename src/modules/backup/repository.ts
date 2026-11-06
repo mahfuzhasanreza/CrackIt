@@ -30,10 +30,8 @@ export async function readAll(userId: string): Promise<{ profile: BackupProfile;
     problems,
     problemTags,
     projects,
-    courses,
-    teachingDemos,
-    publications,
-    vivaQuestions,
+    practiceQuestions,
+    presentations,
     organizations,
     applications,
     applicationEvents,
@@ -60,10 +58,8 @@ export async function readAll(userId: string): Promise<{ profile: BackupProfile;
     db.problem.findMany({ ...u, ...byCreated }),
     db.problemTag.findMany({ where: { problem: { userId } } }),
     db.project.findMany({ ...u, ...byCreated }),
-    db.course.findMany({ ...u, ...byCreated }),
-    db.teachingDemo.findMany({ ...u, ...byCreated }),
-    db.publication.findMany({ ...u, ...byCreated }),
-    db.vivaQuestion.findMany({ ...u, ...byCreated }),
+    db.practiceQuestion.findMany({ ...u, ...byCreated }),
+    db.presentation.findMany({ ...u, ...byCreated }),
     db.organization.findMany({ ...u, ...byCreated }),
     db.application.findMany({ ...u, ...byCreated }),
     db.applicationEvent.findMany({ ...u, orderBy: { at: "asc" } }),
@@ -89,10 +85,8 @@ export async function readAll(userId: string): Promise<{ profile: BackupProfile;
       problems,
       problemTags,
       projects,
-      courses,
-      teachingDemos,
-      publications,
-      vivaQuestions,
+      practiceQuestions,
+      presentations,
       organizations,
       applications,
       applicationEvents,
@@ -112,10 +106,8 @@ async function deleteAll(tx: Tx, userId: string) {
   await tx.resource.deleteMany(u);
   await tx.mockInterview.deleteMany(u);
   await tx.organization.deleteMany(u); // cascades applications, events, interviews
-  await tx.vivaQuestion.deleteMany(u);
-  await tx.teachingDemo.deleteMany(u);
-  await tx.publication.deleteMany(u);
-  await tx.course.deleteMany(u);
+  await tx.practiceQuestion.deleteMany(u);
+  await tx.presentation.deleteMany(u);
   await tx.project.deleteMany(u);
   await tx.problem.deleteMany(u); // cascades problem tags
   await tx.checklist.deleteMany(u); // cascades items and completions
@@ -154,13 +146,10 @@ const INSERT: Record<TableKey, Insert> = {
   problemTags: (tx, r) =>
     tx.problemTag.createMany({ data: r as Prisma.ProblemTagCreateManyInput[] }),
   projects: (tx, r) => tx.project.createMany({ data: r as Prisma.ProjectCreateManyInput[] }),
-  courses: (tx, r) => tx.course.createMany({ data: r as Prisma.CourseCreateManyInput[] }),
-  teachingDemos: (tx, r) =>
-    tx.teachingDemo.createMany({ data: r as Prisma.TeachingDemoCreateManyInput[] }),
-  publications: (tx, r) =>
-    tx.publication.createMany({ data: r as Prisma.PublicationCreateManyInput[] }),
-  vivaQuestions: (tx, r) =>
-    tx.vivaQuestion.createMany({ data: r as Prisma.VivaQuestionCreateManyInput[] }),
+  practiceQuestions: (tx, r) =>
+    tx.practiceQuestion.createMany({ data: r as Prisma.PracticeQuestionCreateManyInput[] }),
+  presentations: (tx, r) =>
+    tx.presentation.createMany({ data: r as Prisma.PresentationCreateManyInput[] }),
   organizations: (tx, r) =>
     tx.organization.createMany({ data: r as Prisma.OrganizationCreateManyInput[] }),
   applications: (tx, r) =>

@@ -65,6 +65,18 @@ async function seed(ctx: Ctx) {
   await db.applicationEvent.create({
     data: { userId, applicationId: app.id, toStatus: "APPLIED", at: new Date() },
   });
+  await db.practiceQuestion.create({
+    data: { userId, trackId: track.id, question: "What is a closure?", answerMd: "" },
+  });
+  await db.presentation.create({
+    data: {
+      userId,
+      trackId: track.id,
+      title: "Demo",
+      date: new Date("2026-11-01"),
+      durationMin: 10,
+    },
+  });
   await db.goal.create({
     data: {
       userId,

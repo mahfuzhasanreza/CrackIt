@@ -2,7 +2,8 @@
 
 # CrackIt — conventions for Claude Code
 
-Personal interview-prep tracker (SWE/full-stack + university lecturer). The full product and
+Interview-prep tracker for any target (each user defines their own tracks; SWE / Full-Stack and
+University Lecturer are optional templates). The full product and
 architecture plan is in `PLAN.md`; implement it phase by phase (section 11).
 
 ## Stack
@@ -160,11 +161,14 @@ UI (Server/Client Components)
   failing a previously solved problem → NEEDS_REVISION; revision "forgot" → NEEDS_REVISION.
   DB CHECK: SOLVED / NEEDS_REVISION require `solved_at`. One problem per link per user.
 
-## Lecturer rules
+## Practice rules
 
-- Publications past WRITING need `submitted_on` (DB CHECK); `lecturer/rules.ts` fills it with the
-  entered date, else the existing one, else today. Viva questions use the shared spaced-repetition
-  schedule (first practice tomorrow). Demo dates can't be in the future.
+- `/practice?tab=questions|presentations` (was the lecturer page; `/lecturer` redirects). Both
+  are track-optional. Questions use the shared spaced-repetition schedule (first practice
+  tomorrow; edits keep the schedule). Presentations can't be in the future; the score trend
+  compares the last 5 scored with the 5 before (`practice/rules.ts`).
+- Courses and publications were removed (migration `20261111000000_practice`); backups from
+  version 1 are upgraded on import (`backup/remap.ts` → `upgradeBackup`).
 
 ## Job hunt rules
 

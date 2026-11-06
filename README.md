@@ -2,9 +2,10 @@
 
 [![CI](https://github.com/mahfuzhasanreza/CrackIt/actions/workflows/ci.yml/badge.svg)](https://github.com/mahfuzhasanreza/CrackIt/actions/workflows/ci.yml)
 
-Personal tracker for cracking interviews — software engineer / full-stack and university
-lecturer prep. Tracks time (study, gaps, sleep, other), what was learned, checklists, problems,
-applications and interviews.
+Personal tracker for cracking interviews, for whatever you're preparing for: you define your own
+tracks (SWE / Full-Stack and University Lecturer are optional templates). Tracks time (study,
+gaps, sleep, other), what was learned, checklists, problems, practice questions, applications
+and interviews.
 
 - **Install it on your phone:** open the site in Chrome (Android) → menu → _Install app_, or in
   Safari (iOS) → Share → _Add to Home Screen_. It opens full-screen like a native app.
