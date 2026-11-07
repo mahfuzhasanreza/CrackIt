@@ -4,7 +4,7 @@ import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/",
-    name: "CrackIt — interview prep tracker",
+    name: "CrackIt - interview prep tracker",
     short_name: "CrackIt",
     description: "Track every hour of interview prep, for whatever you are preparing for.",
     start_url: "/dashboard",

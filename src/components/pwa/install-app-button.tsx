@@ -14,7 +14,7 @@ export function InstallAppButton({ onDone }: { onDone?: () => void }) {
   const canInstall = useCanInstall();
   if (!canInstall) return null;
   return (
-    <div className="shrink-0 border-t p-3">
+    <div className="shrink-0 border-t p-3 pt-0">
       <Button
         variant="outline"
         className="w-full justify-start"
@@ -26,9 +26,6 @@ export function InstallAppButton({ onDone }: { onDone?: () => void }) {
         <Download />
         Install app
       </Button>
-      <p className="mt-2 px-1 text-xs text-muted-foreground">
-        Open CrackIt from your home screen or dock, in its own window.
-      </p>
     </div>
   );
 }
