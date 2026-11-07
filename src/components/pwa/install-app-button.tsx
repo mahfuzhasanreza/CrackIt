@@ -14,7 +14,7 @@ export function InstallAppButton({ onDone }: { onDone?: () => void }) {
   const canInstall = useCanInstall();
   if (!canInstall) return null;
   return (
-    <div className="shrink-0 border-t p-3 pt-0">
+    <div className="shrink-0 p-3">
       <Button
         variant="outline"
         className="w-full justify-start"
