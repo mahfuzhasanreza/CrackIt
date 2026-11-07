@@ -1,4 +1,4 @@
-# CrackIt — Interview Prep Tracker: Implementation Plan
+# CrackIt - Interview Prep Tracker: Implementation Plan
 
 A personal, single-user (multi-user-ready) web app to track everything in the job hunt:
 **Software Engineer / Full-Stack prep** and **University Lecturer prep** — time (study, gaps,
