@@ -225,6 +225,10 @@ UI (Server/Client Components)
   `/api/export/[kind]` with formula-injection escaping (`csv.ts`).
 - PWA: `app/manifest.ts`, icons in `public/icons` (`node scripts/generate-icons.mjs public/icons`),
   `public/sw.js` only serves `/offline.html` when a navigation fails — never cache user data.
+- "Install app" (bottom of the sidebar and phone menu): `components/pwa/install-prompt.ts` keeps
+  Chromium's `beforeinstallprompt` (an inline script from `install-capture.ts` in the root
+  layout catches it before hydration). Shown only when that event fired and the app isn't
+  installed / running standalone — Safari and Firefox never show it. E2E fakes the event.
 - Timer notification (phones only, opt-in per device in Settings → General, stored in
   localStorage): `time-tracking/notification.ts` (content, support check) +
   `components/timer-notification*.tsx|ts` (the header keeps it in sync on every page).

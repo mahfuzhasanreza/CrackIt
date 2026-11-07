@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { Brand } from "@/components/app-shell/brand";
 import { MobileNav } from "@/components/app-shell/mobile-nav";
+import { InstallAppButton } from "@/components/pwa/install-app-button";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { KeyboardShortcuts } from "@/components/shortcuts/keyboard-shortcuts";
@@ -26,6 +27,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="min-h-0 flex-1 overflow-y-auto">
           <SidebarNav />
         </div>
+        <InstallAppButton />
       </aside>
 
       <div className="flex min-h-svh min-w-0 flex-col md:pl-60">
