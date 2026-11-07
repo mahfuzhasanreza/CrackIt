@@ -6,6 +6,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
+import { InstallAppButton } from "@/components/pwa/install-app-button";
+
 import { Brand } from "./brand";
 import { SidebarNav } from "./sidebar-nav";
 
@@ -30,6 +32,7 @@ export function MobileNav() {
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
           <SidebarNav onNavigate={() => setOpen(false)} />
         </div>
+        <InstallAppButton onDone={() => setOpen(false)} />
       </SheetContent>
     </Sheet>
   );
