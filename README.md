@@ -14,9 +14,10 @@ whether you're actually making progress.**
 ![Prisma](https://img.shields.io/badge/Prisma-7-2D3748?logo=prisma)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8?logo=pwa)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 [Features](#features) · [Architecture](#architecture) · [Getting started](#getting-started) ·
-[Testing](#testing) · [Deployment](#deployment) · [Contributing](#contributing)
+[Testing](#testing) · [Deployment](#deployment) · [License](#license)
 
 </div>
 
@@ -42,9 +43,7 @@ whether you're actually making progress.**
 - [Deployment](#deployment)
 - [Security](#security)
 - [Using the app](#using-the-app)
-- [Contributing](#contributing)
-- [Roadmap](#roadmap)
-- [Further reading](#further-reading)
+- [License](#license)
 
 ---
 
@@ -488,6 +487,10 @@ CI builds both images and smoke-tests them against Postgres.
 - **Your data** — Settings → Data downloads a full JSON backup (restorable into any CrackIt
   account, e.g. when moving from local to production) and CSVs of time entries, problems and
   applications.
+
+## License
+
+Released under the [MIT License](./LICENSE). © 2026 Mahfuz Hasan Reza.
 
 ---
 
