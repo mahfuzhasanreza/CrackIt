@@ -29,6 +29,7 @@
     "user:create": "tsx scripts/create-user.ts",
     "user:reset-password": "tsx scripts/reset-password.ts",
     "test:e2e": "playwright test",
+    "screenshots": "playwright test -c scripts/screenshots/playwright.config.ts",
     "test:int": "vitest run --project integration",
     "vercel-build": "prisma migrate deploy && next build"
   },

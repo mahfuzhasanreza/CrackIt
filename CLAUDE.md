@@ -72,6 +72,7 @@ UI (Server/Client Components)
 | `pnpm user:create -- --email <e> [--name <n>]` | Create a login (password prompted; or `CRACKIT_PASSWORD`) |
 | `pnpm user:reset-password -- --email <e>` | New password + sign out all sessions |
 | `pnpm test:e2e` | Playwright against the prod build + test DB (`pnpm build` first) |
+| `pnpm screenshots` | Regenerate README screenshots (demo account on the test DB, `pnpm build` first) → `docs/screenshots/` |
 
 ## Auth
 
