@@ -12,7 +12,7 @@ export async function GuestBanner() {
   const timeLeft = user && (await guestTimeRemaining(user));
   if (!timeLeft) return null;
 
-  // Read on the server so a minimized banner never flashes open on navigation.
-  const minimized = (await cookies()).get(GUEST_BANNER_COOKIE)?.value === "1";
-  return <GuestBannerView timeLeft={timeLeft} initiallyMinimized={minimized} />;
+  // Read on the server so a closed notice never flashes back on navigation.
+  if ((await cookies()).get(GUEST_BANNER_COOKIE)?.value === "1") return null;
+  return <GuestBannerView timeLeft={timeLeft} />;
 }
