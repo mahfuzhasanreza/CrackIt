@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { Brand } from "@/components/app-shell/brand";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { GuestLoginButton } from "@/modules/auth/components/guest-login-button";
 import { LoginForm } from "@/modules/auth/components/login-form";
 import { getCurrentUser } from "@/modules/auth/dal";
 
@@ -30,6 +32,12 @@ export default function LoginPage() {
           <Suspense fallback={<Skeleton className="h-52 w-full" />}>
             <LoginForm />
           </Suspense>
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <Separator className="flex-1" />
+            or
+            <Separator className="flex-1" />
+          </div>
+          <GuestLoginButton />
           <p className="text-center text-sm text-muted-foreground">
             New here?{" "}
             <Link

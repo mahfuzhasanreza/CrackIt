@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isGuestEmail } from "./guest-rules";
+
 export const emailSchema = z.string().trim().toLowerCase().pipe(z.email("Enter a valid email"));
 
 export const loginSchema = z.object({
@@ -41,7 +43,7 @@ export const registerSchema = z
       (v) => (typeof v === "string" && v.trim() === "" ? undefined : v),
       z.string().trim().max(80, "Keep it under 80 characters").optional(),
     ),
-    email: emailSchema,
+    email: emailSchema.refine((e) => !isGuestEmail(e), "This email domain is reserved"),
     password: newPasswordSchema,
     confirmPassword: z.string(),
   })

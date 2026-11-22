@@ -93,6 +93,12 @@ UI (Server/Client Components)
   with dynamic params (e.g. `/applications/[id]`), so read them in a small leaf inside
   `<Suspense>` (see `components/app-shell/sidebar-nav.tsx`) or `next build` fails.
 - Rate limit: 5 failures / 15 min per email, 20 per IP (`login_attempts` table).
+- Guests ("Continue as guest" on `/login`, `auth/guest.ts` + pure `guest-rules.ts`): each click
+  creates a private account (`guest-<uuid>@guest.crackit.local`, name "Guest", random password
+  never shown) filled by `prisma/demo-data.ts` (also used by `pnpm screenshots`), then signs in.
+  10 per IP per hour (recorded in `signup_attempts`, not counted against sign-ups). Guests older
+  than 24 h are deleted (cascade) whenever a new guest is created; sign-up refuses the domain.
+  `GuestBanner` in the app layout tells guests when theirs expires.
 
 ## Prisma 7 notes
 
