@@ -40,3 +40,6 @@ export function guestTimeLeft(createdAt: Date, now: Date): string {
   if (minutes >= 1) return `in ${minutes} minute${minutes === 1 ? "" : "s"}`;
   return "soon";
 }
+
+/** Cookie remembering that a guest minimized the guest banner ("1" = minimized). */
+export const GUEST_BANNER_COOKIE = "crackit-guest-banner-min";
