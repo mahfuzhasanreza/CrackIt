@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/modules/auth/dal";
+import { refuseGuest } from "@/modules/auth/guest";
 import { exportBackup, importBackup } from "@/modules/backup/service";
 
 const MAX_BYTES = 25 * 1024 * 1024;
@@ -22,6 +23,8 @@ export async function GET() {
 export async function POST(request: Request) {
   const user = await getCurrentUser();
   if (!user) return Response.json({ error: "Sign in first." }, { status: 401 });
+  const guest = refuseGuest(user);
+  if (!guest.ok) return Response.json({ error: guest.error.message }, { status: 403 });
 
   // Same-origin JSON only (a cross-site form can't send application/json without CORS).
   const origin = request.headers.get("origin");

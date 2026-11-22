@@ -82,7 +82,7 @@ minute, note, problem and application can be tied back to them.
 | **Checklists**        | One-off checklists and recurring daily/weekly **habits** with streaks.                                                                                                                              |
 | **Job hunt**          | Applications on a drag-and-drop **kanban** (mouse, touch and keyboard, plus a "Move to" menu), an event history per application, an interview **calendar**, interview outcomes and mock interviews. |
 | **Goals & analytics** | Daily/weekly/monthly goals; charts for hours per track, sleep, focus, untracked time and the application funnel over 7 days to 12 months, each with a table view.                                   |
-| **Guest mode**        | "Continue as guest" on the login page: a private, throwaway account filled with demo data, no sign-up needed. Deleted after 24 hours.                                                               |
+| **Guest mode**        | "Continue as guest" on the login page: one shared account filled with demo data, no sign-up needed.                                                                                                 |
 | **Data ownership**    | Full JSON backup and restore (into any CrackIt account), CSV export of time entries, problems and applications.                                                                                     |
 | **Polish**            | Installable PWA, dark mode, keyboard shortcuts (press <kbd>?</kbd>), responsive down to 360 px.                                                                                                     |
 
@@ -372,7 +372,7 @@ pnpm dev                           # http://localhost:3000
 ### Signing in
 
 - Seeded dev user: **`dev@crackit.local`** / **`crackit-dev-password`**
-- Or click **Continue as guest** on the login page for a throwaway account full of demo data
+- Or click **Continue as guest** on the login page for the shared account full of demo data
 - Or sign up at <http://localhost:3000/register> (new accounts pick their own tracks or start
   from a template)
 - Or create an account from the CLI:
@@ -504,10 +504,10 @@ CI builds both images and smoke-tests them against Postgres.
 - **Passwords** hashed with argon2id; changing the password bumps `sessionVersion`, which signs
   out every session.
 - **Rate limiting** — login: 5 failures per email per 15 minutes and 20 per IP; sign-up: 5
-  attempts per IP per hour; guest accounts: 10 per IP per hour.
-- **Guest isolation** — every guest gets their own account (no shared demo login whose password
-  anyone could change), with a random password that is never shown. Guests use a reserved email
-  domain that sign-up refuses, and accounts older than 24 hours are deleted with all their data.
+  attempts per IP per hour.
+- **Shared guest account** — everyone who continues as a guest uses the same demo account. It
+  has no password (only the guest button signs in), its profile, password and backup restore are
+  locked on the server, and its reserved email domain is refused by sign-up.
 - **Authorization on the server** — `proxy.ts` only does optimistic redirects; every page,
   Server Action and Route Handler re-checks the user with `requireUser()`, and every query is
   scoped by `userId`.

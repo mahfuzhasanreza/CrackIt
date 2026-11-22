@@ -2,13 +2,12 @@ import { Info } from "lucide-react";
 
 import { leaveGuestToRegisterAction } from "../actions";
 import { getCurrentUser } from "../dal";
-import { guestTimeRemaining } from "../guest";
+import { isGuestEmail } from "../guest-rules";
 
 /** Shown on every page to guests. Server Component: render inside <Suspense>. */
 export async function GuestBanner() {
   const user = await getCurrentUser();
-  const timeLeft = user && (await guestTimeRemaining(user));
-  if (!timeLeft) return null;
+  if (!user || !isGuestEmail(user.email)) return null;
 
   return (
     <div
@@ -17,8 +16,8 @@ export async function GuestBanner() {
     >
       <Info className="size-4 shrink-0 text-muted-foreground" aria-hidden />
       <p className="flex-1">
-        You&apos;re exploring a <strong>guest account</strong> with demo data. Change anything you
-        like: it&apos;s deleted {timeLeft}.
+        You&apos;re exploring the <strong>shared guest account</strong>. Anyone who continues as a
+        guest sees the same data, including your changes.
       </p>
       <form action={leaveGuestToRegisterAction}>
         <button

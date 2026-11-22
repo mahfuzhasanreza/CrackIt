@@ -23,14 +23,14 @@ import { seedDefaultsForUser } from "./seed-defaults";
 export async function seedDemoData(
   prisma: PrismaClient,
   userId: string,
-  { timezone, dayStartHour, now = new Date() }: DemoOptions,
+  { timezone, dayStartHour, now = new Date(), runningTimer = true }: DemoOptions,
 ) {
   await seedDefaultsForUser(prisma, userId, { starterTracks: true });
   const ctx = await loadContext(prisma, userId, timezone, now);
   const today = logicalDateKey(now, timezone, dayStartHour);
 
   await seedTopicStatuses(prisma, ctx);
-  await seedTime(prisma, ctx, today);
+  await seedTime(prisma, ctx, today, runningTimer);
   await seedJournal(prisma, ctx, today);
   await seedProblems(prisma, ctx, today);
   await seedPractice(prisma, ctx, today);
@@ -41,7 +41,13 @@ export async function seedDemoData(
   await seedGoals(prisma, ctx, today);
 }
 
-export type DemoOptions = { timezone: string; dayStartHour: number; now?: Date };
+export type DemoOptions = {
+  timezone: string;
+  dayStartHour: number;
+  now?: Date;
+  /** Leave a timer running at `now` (off for long-lived accounts, where it would run on). */
+  runningTimer?: boolean;
+};
 
 const HISTORY_DAYS = 90;
 const MIN = 60_000;
@@ -121,7 +127,7 @@ async function seedTopicStatuses(prisma: PrismaClient, ctx: Ctx) {
   }
 }
 
-async function seedTime(prisma: PrismaClient, ctx: Ctx, today: string) {
+async function seedTime(prisma: PrismaClient, ctx: Ctx, today: string, runningTimer: boolean) {
   const now = ctx.now.getTime();
   const data: Prisma.TimeEntryCreateManyInput[] = [];
   const add = (
@@ -182,14 +188,16 @@ async function seedTime(prisma: PrismaClient, ctx: Ctx, today: string) {
     }
   }
   // A timer running right now, so the dashboard and header show it.
-  data.push({
-    userId: ctx.userId,
-    activityTypeId: ctx.type("Study"),
-    trackId: ctx.swe.id,
-    topicId: ctx.dsaLeaves[0]?.id,
-    startedAt: new Date(now - 47 * MIN),
-    endedAt: null,
-  });
+  if (runningTimer) {
+    data.push({
+      userId: ctx.userId,
+      activityTypeId: ctx.type("Study"),
+      trackId: ctx.swe.id,
+      topicId: ctx.dsaLeaves[0]?.id,
+      startedAt: new Date(now - 47 * MIN),
+      endedAt: null,
+    });
+  }
   await prisma.timeEntry.createMany({ data });
 }
 

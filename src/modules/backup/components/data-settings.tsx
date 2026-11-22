@@ -43,7 +43,8 @@ function summarize(text: string): Omit<Pending, "file" | "text"> {
   return { exportedAt: exportedAt ?? "unknown", counts };
 }
 
-export function DataSettings() {
+/** `canRestore` is false for the shared guest account (restoring would wipe it for everyone). */
+export function DataSettings({ canRestore = true }: { canRestore?: boolean }) {
   const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<Pending | null>(null);
@@ -119,60 +120,64 @@ export function DataSettings() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <h2>Restore from a backup</h2>
-          </CardTitle>
-          <CardDescription>
-            Replaces <strong>all</strong> your current data with the backup&apos;s. Download a
-            backup first if you might want today&apos;s data back.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <input
-            ref={input}
-            type="file"
-            accept="application/json,.json"
-            className="sr-only"
-            aria-label="Backup file"
-            onChange={onFile}
-          />
-          <Button variant="outline" onClick={() => input.current?.click()}>
-            <FileUp />
-            Choose backup file…
-          </Button>
-        </CardContent>
-      </Card>
+      {canRestore && (
+        <>
+          <Card>
+            <CardHeader>
+              <CardTitle>
+                <h2>Restore from a backup</h2>
+              </CardTitle>
+              <CardDescription>
+                Replaces <strong>all</strong> your current data with the backup&apos;s. Download a
+                backup first if you might want today&apos;s data back.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <input
+                ref={input}
+                type="file"
+                accept="application/json,.json"
+                className="sr-only"
+                aria-label="Backup file"
+                onChange={onFile}
+              />
+              <Button variant="outline" onClick={() => input.current?.click()}>
+                <FileUp />
+                Choose backup file…
+              </Button>
+            </CardContent>
+          </Card>
 
-      <Dialog open={pending !== null} onOpenChange={(o) => !o && !busy && setPending(null)}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Replace all your data?</DialogTitle>
-            <DialogDescription>
-              {pending?.file} · exported {pending?.exportedAt.slice(0, 10)}. Everything you have now
-              is deleted and replaced with:
-            </DialogDescription>
-          </DialogHeader>
-          <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-            {pending?.counts.map(([key, n]) => (
-              <li key={key} className="flex justify-between gap-2">
-                <span className="text-muted-foreground">{TABLE_LABEL[key]}</span>
-                <span className="tabular-nums">{n}</span>
-              </li>
-            ))}
-          </ul>
-          <DialogFooter className="gap-2">
-            <Button variant="ghost" disabled={busy} onClick={() => setPending(null)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" disabled={busy} onClick={restore}>
-              {busy && <LoaderCircle className="animate-spin" />}
-              Replace my data
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <Dialog open={pending !== null} onOpenChange={(o) => !o && !busy && setPending(null)}>
+            <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
+              <DialogHeader>
+                <DialogTitle>Replace all your data?</DialogTitle>
+                <DialogDescription>
+                  {pending?.file} · exported {pending?.exportedAt.slice(0, 10)}. Everything you have
+                  now is deleted and replaced with:
+                </DialogDescription>
+              </DialogHeader>
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+                {pending?.counts.map(([key, n]) => (
+                  <li key={key} className="flex justify-between gap-2">
+                    <span className="text-muted-foreground">{TABLE_LABEL[key]}</span>
+                    <span className="tabular-nums">{n}</span>
+                  </li>
+                ))}
+              </ul>
+              <DialogFooter className="gap-2">
+                <Button variant="ghost" disabled={busy} onClick={() => setPending(null)}>
+                  Cancel
+                </Button>
+                <Button variant="destructive" disabled={busy} onClick={restore}>
+                  {busy && <LoaderCircle className="animate-spin" />}
+                  Replace my data
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }

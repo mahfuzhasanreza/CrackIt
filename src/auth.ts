@@ -1,6 +1,7 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
+import { getOrCreateGuest } from "@/modules/auth/guest";
 import { authRepository } from "@/modules/auth/repository";
 import { createAuthService } from "@/modules/auth/service";
 import { dummyVerify, verifyPassword } from "@/modules/auth/password";
@@ -53,6 +54,13 @@ export const {
         }
         return result.data;
       },
+    }),
+    // "Continue as guest": everyone shares one demo account, which has no password.
+    Credentials({
+      id: "guest",
+      name: "Guest",
+      credentials: {},
+      authorize: () => getOrCreateGuest(),
     }),
   ],
   callbacks: {

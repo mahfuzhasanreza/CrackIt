@@ -3,8 +3,10 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { TabNav } from "@/components/tab-nav";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { requireUser } from "@/modules/auth/dal";
+import { GUEST_LOCKED_MESSAGE, isGuestEmail } from "@/modules/auth/guest-rules";
 import { DataSettings } from "@/modules/backup/components/data-settings";
 import { PasswordForm, ProfileForm } from "@/modules/settings/components/general-settings";
 import { ActivitySettings, TracksSettings } from "@/modules/settings/components/tracks-settings";
@@ -44,6 +46,7 @@ async function SettingsContent({ searchParams }: Pick<PageProps<"/settings">, "s
   const params = await searchParams;
   const raw = params.tab;
   const tab: Tab = typeof raw === "string" && raw in TABS ? (raw as Tab) : "general";
+  const guest = isGuestEmail(user.email);
 
   return (
     <>
@@ -68,17 +71,33 @@ async function SettingsContent({ searchParams }: Pick<PageProps<"/settings">, "s
         }))}
       />
 
-      {tab === "general" && <General userId={user.id} />}
+      {tab === "general" && <General userId={user.id} guest={guest} />}
       {tab === "tracks" && (
         <TracksSettings tracks={await listTracks(user.id)} openAdd={params.add === "1"} />
       )}
       {tab === "activities" && <ActivitySettings activities={await listActivityTypes(user.id)} />}
-      {tab === "data" && <DataSettings />}
+      {tab === "data" && <DataSettings canRestore={!guest} />}
     </>
   );
 }
 
-async function General({ userId }: { userId: string }) {
+async function General({ userId, guest }: { userId: string; guest: boolean }) {
+  if (guest) {
+    // The shared guest account: profile and password belong to everyone, so they're locked.
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <h2>Profile & password</h2>
+            </CardTitle>
+            <CardDescription>{GUEST_LOCKED_MESSAGE}</CardDescription>
+          </CardHeader>
+        </Card>
+        <TimerNotificationSetting />
+      </div>
+    );
+  }
   const profile = (await getProfile(userId))!;
   return (
     <div className="flex flex-col gap-6">

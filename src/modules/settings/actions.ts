@@ -5,6 +5,7 @@ import { formFields, invalidState, toActionState } from "@/lib/action-result";
 import type { ActionState } from "@/lib/action-state";
 
 import { requireUser } from "../auth/dal";
+import { refuseGuest } from "../auth/guest";
 
 import * as service from "./service";
 import {
@@ -22,6 +23,8 @@ export async function saveProfileAction(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
+  const guest = refuseGuest(user);
+  if (!guest.ok) return toActionState(guest);
   const parsed = profileSchema.safeParse(formFields(formData));
   if (!parsed.success) return invalidState(parsed.error.flatten().fieldErrors);
   return toActionState(await service.saveProfile(user.id, parsed.data), "Settings saved");
@@ -33,6 +36,8 @@ export async function changePasswordAction(
   formData: FormData,
 ): Promise<ActionState> {
   const user = await requireUser();
+  const guest = refuseGuest(user);
+  if (!guest.ok) return toActionState(guest);
   const parsed = passwordChangeSchema.safeParse(formFields(formData));
   if (!parsed.success) return invalidState(parsed.error.flatten().fieldErrors);
   const result = await service.changePassword(user.id, parsed.data);

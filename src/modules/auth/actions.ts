@@ -5,7 +5,6 @@ import { AuthError, CredentialsSignin } from "next-auth";
 
 import { signIn, signOut } from "@/auth";
 
-import { createGuest } from "./guest";
 import { registerUser } from "./registration";
 import { loginSchema, registerSchema, safeRedirectPath } from "./validators";
 
@@ -75,15 +74,10 @@ export async function registerAction(
   return {};
 }
 
-export type GuestState = { error?: string };
-
-/** "Continue as guest": a fresh demo account for this visitor, then sign straight in. */
-export async function guestLoginAction(_prev: GuestState, formData: FormData): Promise<GuestState> {
-  const result = await createGuest(await requestIp(), formData.get("timezone"));
-  if (!result.ok) return { error: result.error.message };
+/** "Continue as guest": sign into the shared demo account. */
+export async function guestLoginAction() {
   // Throws the redirect to the dashboard.
-  await signIn("credentials", { ...result.data, redirectTo: "/dashboard" });
-  return {};
+  await signIn("guest", { redirectTo: "/dashboard" });
 }
 
 async function requestIp() {

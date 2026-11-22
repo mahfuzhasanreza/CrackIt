@@ -1,38 +1,30 @@
 "use client";
 
-import { CircleAlert, LoaderCircle, UserRound } from "lucide-react";
-import { useActionState } from "react";
+import { LoaderCircle, UserRound } from "lucide-react";
+import { useFormStatus } from "react-dom";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
-import { guestLoginAction, type GuestState } from "../actions";
+import { guestLoginAction } from "../actions";
 
-/** "Continue as guest": a throwaway account with demo data, in the visitor's time zone. */
+/** "Continue as guest": sign into the shared demo account. */
 export function GuestLoginButton() {
-  const [state, formAction, pending] = useActionState<GuestState, FormData>(guestLoginAction, {});
-
   return (
-    <form
-      action={(formData) => {
-        formData.set("timezone", Intl.DateTimeFormat().resolvedOptions().timeZone);
-        formAction(formData);
-      }}
-      className="flex flex-col gap-2"
-    >
-      {state.error && (
-        <Alert variant="destructive" role="alert">
-          <CircleAlert />
-          <AlertDescription>{state.error}</AlertDescription>
-        </Alert>
-      )}
-      <Button type="submit" variant="outline" disabled={pending}>
-        {pending ? <LoaderCircle className="animate-spin" /> : <UserRound />}
-        {pending ? "Setting up a demo account…" : "Continue as guest"}
-      </Button>
+    <form action={guestLoginAction} className="flex flex-col gap-2">
+      <SubmitButton />
       <p className="text-center text-xs text-muted-foreground">
-        No sign-up: explore with demo data. Guest accounts are deleted after 24 hours.
+        No sign-up: explore a shared account with demo data.
       </p>
     </form>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" variant="outline" disabled={pending}>
+      {pending ? <LoaderCircle className="animate-spin" /> : <UserRound />}
+      {pending ? "Signing in…" : "Continue as guest"}
+    </Button>
   );
 }

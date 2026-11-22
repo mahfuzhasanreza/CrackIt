@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import { seedDemoData } from "../../../prisma/demo-data";
 import { seedDefaultsForUser } from "../../../prisma/seed-defaults";
 
-import { GUEST_EMAIL_DOMAIN, GUEST_NAME } from "./guest-rules";
+import { GUEST_DAY_START_HOUR, GUEST_EMAIL, GUEST_NAME, GUEST_TIMEZONE } from "./guest-rules";
 import type { AuthRepository } from "./service";
 
 export const authRepository: AuthRepository = {
@@ -46,13 +46,9 @@ export function emailTaken(email: string) {
   return db.user.findUnique({ where: { email }, select: { id: true } });
 }
 
-const GUEST_EMAILS = { endsWith: `@${GUEST_EMAIL_DOMAIN}` };
-
-/** Sign-up attempts from an IP (guest accounts don't count: they have their own limit). */
+/** Sign-up attempts from an IP. */
 export function countSignupAttemptsSince(ip: string, since: Date) {
-  return db.signupAttempt.count({
-    where: { ip, createdAt: { gte: since }, NOT: { email: GUEST_EMAILS } },
-  });
+  return db.signupAttempt.count({ where: { ip, createdAt: { gte: since } } });
 }
 
 export async function recordSignupAttempt(attempt: {
@@ -74,48 +70,47 @@ export async function createUserWithDefaults(data: {
   return user;
 }
 
-// ── Guests ──────────────────────────────────────────────────────────────────
+// ── Guest ───────────────────────────────────────────────────────────────────
 
-export function countGuestSignupsSince(ip: string, since: Date) {
-  return db.signupAttempt.count({ where: { ip, createdAt: { gte: since }, email: GUEST_EMAILS } });
+const GUEST_SESSION_FIELDS = { id: true, email: true, name: true, sessionVersion: true } as const;
+
+export function findGuest() {
+  return db.user.findUnique({ where: { email: GUEST_EMAIL }, select: GUEST_SESSION_FIELDS });
 }
 
-/** Expired guests and everything they own (every table cascades from users). */
-export async function deleteGuestsCreatedBefore(cutoff: Date) {
-  const { count } = await db.user.deleteMany({
-    where: { email: GUEST_EMAILS, createdAt: { lt: cutoff } },
-  });
-  return count;
-}
-
-/** A guest user filled with demo data; removed again if filling it fails. */
-export async function createGuestUser(data: {
-  email: string;
-  passwordHash: string;
-  timezone: string;
-  now: Date;
-}) {
-  const dayStartHour = 4;
-  const user = await db.user.create({
-    data: {
-      email: data.email,
-      name: GUEST_NAME,
-      passwordHash: data.passwordHash,
-      timezone: data.timezone,
-      dayStartHour,
-    },
-    select: { id: true },
-  });
+/**
+ * The shared guest (no password), filled with demo data; removed again if filling it fails.
+ * Two first visitors at once: the loser's insert hits the unique email and it reads the winner's.
+ */
+export async function createGuest(now: Date) {
+  let user;
   try {
-    await seedDemoData(db, user.id, { timezone: data.timezone, dayStartHour, now: data.now });
+    user = await db.user.create({
+      data: {
+        email: GUEST_EMAIL,
+        name: GUEST_NAME,
+        timezone: GUEST_TIMEZONE,
+        dayStartHour: GUEST_DAY_START_HOUR,
+      },
+      select: GUEST_SESSION_FIELDS,
+    });
+  } catch (e) {
+    if (e instanceof Error && "code" in e && e.code === "P2002") {
+      const existing = await findGuest();
+      if (existing) return existing;
+    }
+    throw e;
+  }
+  try {
+    await seedDemoData(db, user.id, {
+      timezone: GUEST_TIMEZONE,
+      dayStartHour: GUEST_DAY_START_HOUR,
+      now,
+      runningTimer: false, // it would run on for as long as the account exists
+    });
   } catch (e) {
     await db.user.delete({ where: { id: user.id } });
     throw e;
   }
   return user;
-}
-
-/** When the user's account was created (guests expire a fixed time after it). */
-export function findUserCreatedAt(id: string) {
-  return db.user.findUnique({ where: { id }, select: { createdAt: true } });
 }

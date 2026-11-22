@@ -4,6 +4,7 @@
  */
 import { createScriptClient } from "../prisma/client";
 import { seedDefaultsForUser } from "../prisma/seed-defaults";
+import { GUEST_EMAIL } from "../src/modules/auth/guest-rules";
 import { hashPassword } from "../src/modules/auth/password";
 
 import { USERS } from "./fixtures";
@@ -15,6 +16,8 @@ async function main() {
     await prisma.signupAttempt.deleteMany();
     // Accounts made by the sign-up test (everything they own cascades).
     await prisma.user.deleteMany({ where: { email: { startsWith: "e2e-signup" } } });
+    // The shared guest: the guest test starts from fresh demo data.
+    await prisma.user.deleteMany({ where: { email: GUEST_EMAIL } });
     const testUsers = { user: { email: { in: Object.values(USERS).map((u) => u.email) } } };
     await prisma.timeEntry.deleteMany({ where: testUsers });
     await prisma.dailyLog.deleteMany({ where: testUsers });
