@@ -88,7 +88,7 @@ describe("timer", () => {
       ctx.user.id,
       {
         activityTypeId: ctx.activity("Study").id,
-        trackId: ctx.track("University Lecturer").id,
+        trackId: ctx.track("Data Science / ML").id,
         topicId: graphs.id,
       },
       at("2026-11-05T04:00:00Z"),

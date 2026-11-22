@@ -33,11 +33,11 @@ test("anyone can create an account and lands on their dashboard", async ({ page 
   // No predefined tracks: the dashboard asks what you're preparing for.
   const setup = page.getByRole("region", { name: "What are you preparing for?" });
   await expect(setup).toBeVisible();
-  await setup.getByRole("button", { name: "Use the University Lecturer template" }).click();
-  await expect(page.getByText("Added “University Lecturer”")).toBeVisible();
+  await setup.getByRole("button", { name: "Use the Data Science / ML template" }).click();
+  await expect(page.getByText("Added “Data Science / ML”")).toBeVisible();
   await expect(setup).toBeHidden();
   await page.goto("/settings?tab=tracks");
-  await expect(page.getByRole("listitem").filter({ hasText: "University Lecturer" })).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "Data Science / ML" })).toBeVisible();
   await expect(page.getByRole("listitem").filter({ hasText: "SWE / Full-Stack" })).toHaveCount(0);
 
   // With a track, the setup card is gone from Topics too.

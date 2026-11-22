@@ -148,15 +148,15 @@ describe("settings", () => {
   it("adds a starter template as the user's own track, once", async () => {
     const fresh = (await createTestUser()).user.id;
     await db.track.deleteMany({ where: { userId: fresh } }); // like a new sign-up
-    expect((await addTemplateTrack(fresh, "University Lecturer")).ok).toBe(true);
+    expect((await addTemplateTrack(fresh, "Data Science / ML")).ok).toBe(true);
     const [track] = await listTracks(fresh);
-    expect(track).toMatchObject({ name: "University Lecturer", isActive: true });
+    expect(track).toMatchObject({ name: "Data Science / ML", isActive: true });
     expect(track!._count.topics).toBeGreaterThan(5);
     expect(await db.topic.count({ where: { trackId: track!.id, parentId: null } })).toBeGreaterThan(
       1,
     );
 
-    const again = await addTemplateTrack(fresh, "University Lecturer");
+    const again = await addTemplateTrack(fresh, "Data Science / ML");
     expect(!again.ok && again.error.code).toBe("CONFLICT");
     expect((await addTemplateTrack(fresh, "Astronaut")).ok).toBe(false);
   });

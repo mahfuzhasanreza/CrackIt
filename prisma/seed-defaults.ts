@@ -4,7 +4,7 @@ import { DEFAULT_TRACKS, type DefaultTopic } from "../src/modules/tracks-topics/
 
 /**
  * Give a user the default activity types and, only when asked, the starter tracks with their
- * topic trees (SWE / Full-Stack, University Lecturer). New sign-ups get no tracks: they pick
+ * topic trees (SWE / Full-Stack, Data Science / ML). New sign-ups get no tracks: they pick
  * their own targets (or a template) on first visit.
  * Idempotent: safe to run repeatedly; existing rows (matched by name) are left untouched.
  * Used by `pnpm db:seed`, `pnpm user:create`, sign-up and tests.

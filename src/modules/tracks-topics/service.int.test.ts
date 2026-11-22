@@ -99,7 +99,7 @@ describe("topic CRUD", () => {
 
   it("rejects a parent from another track or user", async () => {
     const res = await createTopic(ctx.user.id, {
-      trackId: ctx.track("University Lecturer").id,
+      trackId: ctx.track("Data Science / ML").id,
       parentId: ctx.topic("Dynamic Programming").id,
       name: "X",
     });

@@ -59,7 +59,7 @@ describe("presentations", () => {
 
 describe("question bank", () => {
   it("schedules tomorrow, keeps the schedule on edit, and follows remembered / forgot", async () => {
-    const lecturer = ctx.track("University Lecturer").id;
+    const lecturer = ctx.track("Data Science / ML").id;
     expect(
       (
         await saveQuestion(
