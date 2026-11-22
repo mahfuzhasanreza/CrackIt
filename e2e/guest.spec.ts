@@ -13,6 +13,16 @@ test("anyone can try the app as a guest with demo data, then sign up", async ({ 
   await page.goto("/applications?view=board");
   await expect(page.getByText("Northwind Labs")).toBeVisible();
 
+  // The notice can be minimized to one line, and stays that way on other pages.
+  await banner.getByRole("button", { name: "Minimize guest account notice" }).click();
+  await expect(banner).toHaveText(/^Guest account · deleted in 2\d? hours?$/);
+  await page.goto("/dashboard");
+  await expect(banner).toHaveText(/^Guest account · deleted in/);
+  await expect(banner.getByRole("button", { name: "Create your own account" })).toHaveCount(0);
+  await banner.getByRole("button", { name: "Show guest account notice" }).click();
+  await page.reload();
+  await expect(banner).toContainText("You're exploring a guest account");
+
   // Leaving the guest account for a real one.
   await banner.getByRole("button", { name: "Create your own account" }).click();
   await expect(page).toHaveURL(/\/register$/);
