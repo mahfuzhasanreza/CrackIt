@@ -1,5 +1,8 @@
 import { expect, test } from "@playwright/test";
 
+// Each test creates a guest account filled with demo data (~2,000 rows): slow on CI runners.
+test.describe.configure({ timeout: 90_000 });
+
 test("anyone can try the app as a guest with demo data, then sign up", async ({ page }) => {
   await page.goto("/login");
   await page.getByRole("button", { name: "Continue as guest" }).click();
