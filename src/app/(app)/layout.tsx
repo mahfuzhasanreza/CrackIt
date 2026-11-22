@@ -7,6 +7,7 @@ import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { ThemeToggle } from "@/components/app-shell/theme-toggle";
 import { KeyboardShortcuts } from "@/components/shortcuts/keyboard-shortcuts";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GuestBanner } from "@/modules/auth/components/guest-banner";
 import { UserMenu } from "@/modules/auth/components/user-menu";
 import { HeaderTimer } from "@/modules/time-tracking/components/header-timer";
 
@@ -46,6 +47,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <UserMenu />
           </Suspense>
         </header>
+        <Suspense>
+          <GuestBanner />
+        </Suspense>
         <main className="min-w-0 flex-1 px-4 py-6 md:px-8">{children}</main>
       </div>
       <KeyboardShortcuts />
