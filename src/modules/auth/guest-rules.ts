@@ -41,5 +41,5 @@ export function guestTimeLeft(createdAt: Date, now: Date): string {
   return "soon";
 }
 
-/** Cookie remembering that a guest minimized the guest banner ("1" = minimized). */
-export const GUEST_BANNER_COOKIE = "crackit-guest-banner-min";
+/** Cookie remembering that a guest closed the guest notice ("1" = closed). */
+export const GUEST_BANNER_COOKIE = "crackit-guest-banner-closed";

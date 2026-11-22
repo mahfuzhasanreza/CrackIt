@@ -1,51 +1,20 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Info } from "lucide-react";
+import { Info, X } from "lucide-react";
 import { useState } from "react";
 
 import { leaveGuestToRegisterAction } from "../actions";
 import { GUEST_BANNER_COOKIE } from "../guest-rules";
 
-function remember(minimized: boolean) {
-  // A guest account lives 24 hours at most, so the cookie never needs to outlive it.
-  document.cookie = minimized
-    ? `${GUEST_BANNER_COOKIE}=1; path=/; max-age=86400; samesite=lax`
-    : `${GUEST_BANNER_COOKIE}=; path=/; max-age=0; samesite=lax`;
-}
+/** The guest notice; the guest can close it for good (a guest account lives 24 hours at most). */
+export function GuestBannerView({ timeLeft }: { timeLeft: string }) {
+  const [closed, setClosed] = useState(false);
+  if (closed) return null;
 
-/** The guest notice, full or minimized to one short line. */
-export function GuestBannerView({
-  timeLeft,
-  initiallyMinimized,
-}: {
-  timeLeft: string;
-  initiallyMinimized: boolean;
-}) {
-  const [minimized, setMinimized] = useState(initiallyMinimized);
-  const toggle = () => {
-    remember(!minimized);
-    setMinimized(!minimized);
+  const close = () => {
+    document.cookie = `${GUEST_BANNER_COOKIE}=1; path=/; max-age=86400; samesite=lax`;
+    setClosed(true);
   };
-
-  if (minimized) {
-    return (
-      <div
-        role="status"
-        className="flex items-center gap-2 border-b bg-muted px-4 py-1 text-xs text-muted-foreground md:px-8"
-      >
-        <Info className="size-3.5 shrink-0" aria-hidden />
-        <p className="flex-1">Guest account · deleted {timeLeft}</p>
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label="Show guest account notice"
-          className="rounded p-1 hover:bg-background hover:text-foreground"
-        >
-          <ChevronDown className="size-3.5" aria-hidden />
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -67,11 +36,11 @@ export function GuestBannerView({
       </form>
       <button
         type="button"
-        onClick={toggle}
-        aria-label="Minimize guest account notice"
+        onClick={close}
+        aria-label="Close guest account notice"
         className="rounded p-1 text-muted-foreground hover:bg-background hover:text-foreground"
       >
-        <ChevronUp className="size-4" aria-hidden />
+        <X className="size-4" aria-hidden />
       </button>
     </div>
   );
