@@ -43,11 +43,11 @@ jobs:
         run: |
           stamp=$(date -u +%Y%m%dT%H%M%SZ)
           echo "STAMP=$stamp" >> "$GITHUB_ENV"
-          # pg_dump must be >= the server's major version; 17 covers Neon's 16 and 17.
-          docker run --rm -e DATABASE_URL postgres:17-alpine \
+          # pg_dump must be >= the server's major version (Neon runs Postgres 18).
+          docker run --rm -e DATABASE_URL postgres:18-alpine \
             sh -c 'pg_dump --format=custom --no-owner --no-acl "$DATABASE_URL"' > crackit.dump
           test -s crackit.dump
-          docker run --rm -v "$PWD:/w" postgres:17-alpine pg_restore --list /w/crackit.dump > /dev/null
+          docker run --rm -v "$PWD:/w" postgres:18-alpine pg_restore --list /w/crackit.dump > /dev/null
           gpg --batch --yes --symmetric --cipher-algo AES256 --passphrase "$PASSPHRASE" \
             -o "crackit-$stamp.dump.gpg" crackit.dump
           rm crackit.dump
