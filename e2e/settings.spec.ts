@@ -42,7 +42,7 @@ test("profile, tracks and activity types", async ({ page }) => {
   await expect(
     dialog.getByText("Line 2: “graphs” is listed twice at the same level."),
   ).toBeVisible();
-  await dialog.getByRole("button", { name: "University Lecturer" }).click();
+  await dialog.getByRole("button", { name: "Data Science / ML" }).click();
   await expect(dialog.getByText(/^\d+ topics$/)).toBeVisible();
   await page.keyboard.press("Escape");
 

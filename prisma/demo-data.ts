@@ -14,7 +14,7 @@ import { seedDefaultsForUser } from "./seed-defaults";
 /**
  * Fills an account with ~3 months of realistic, made-up prep data: time entries (with a timer
  * running now), journal, learning notes, problems, practice, applications and interviews,
- * resources, habits, projects and goals. All names (companies, universities) are fictional.
+ * resources, habits, projects and goals. All company names are fictional.
  * Dates are relative to `now`, so the data always looks current.
  *
  * Used by guest accounts (`auth/guest.ts`) and the README screenshots. Expects a user with no
@@ -74,7 +74,7 @@ async function loadContext(prisma: PrismaClient, userId: string, timezone: strin
     }),
   ]);
   const swe = tracks.find((t) => t.name === "SWE / Full-Stack")!;
-  const lecturer = tracks.find((t) => t.name === "University Lecturer")!;
+  const ds = tracks.find((t) => t.name === "Data Science / ML")!;
   const leaves = topics.filter((t) => t.children.length === 0);
 
   /** A local wall-clock time on a date key (minutes after midnight, may be < 0 or ≥ 24h). */
@@ -94,11 +94,11 @@ async function loadContext(prisma: PrismaClient, userId: string, timezone: strin
     at,
     ...random(42),
     swe,
-    lecturer,
+    ds,
     type: (name: string) => types.find((t) => t.name === name)!.id,
     leaves,
     sweLeaves: leaves.filter((t) => t.trackId === swe.id),
-    lecturerLeaves: leaves.filter((t) => t.trackId === lecturer.id),
+    dsLeaves: leaves.filter((t) => t.trackId === ds.id),
     dsaLeaves: leaves.filter((t) => t.parent?.name === "Data Structures & Algorithms"),
   };
 }
@@ -143,10 +143,10 @@ async function seedTime(prisma: PrismaClient, ctx: Ctx, today: string) {
       ...extra,
     });
   };
-  const study = (key: string, from: number, to: number, lecturer = false) => {
+  const study = (key: string, from: number, to: number, ds = false) => {
     add(key, from, to, "Study", {
-      trackId: (lecturer ? ctx.lecturer : ctx.swe).id,
-      topicId: ctx.pickOne(lecturer ? ctx.lecturerLeaves : ctx.sweLeaves).id,
+      trackId: (ds ? ctx.ds : ctx.swe).id,
+      topicId: ctx.pickOne(ds ? ctx.dsLeaves : ctx.sweLeaves).id,
       focusRating: ctx.between(3, 5),
     });
   };
@@ -197,7 +197,7 @@ async function seedJournal(prisma: PrismaClient, ctx: Ctx, today: string) {
   const plans = [
     "Two graph problems, then finish the caching chapter.",
     "Mock system design in the evening; review yesterday's notes.",
-    "Teaching demo rehearsal + one DP problem.",
+    "A/B testing chapter + one DP problem.",
     "Revise SQL indexing, apply to two roles.",
   ];
   const wins = [
@@ -265,9 +265,9 @@ async function seedJournal(prisma: PrismaClient, ctx: Ctx, today: string) {
       ["dsa", "graphs"],
     ],
     [
-      "Constructive alignment",
-      "Learning outcomes, activities and assessment should all point at the same goal.",
-      ["teaching"],
+      "Precision vs recall",
+      "Precision: how many flagged are right. Recall: how many right ones were flagged. F1 balances them.",
+      ["ml"],
     ],
     [
       "HTTP caching",
@@ -287,7 +287,7 @@ async function seedJournal(prisma: PrismaClient, ctx: Ctx, today: string) {
       data: {
         userId: ctx.userId,
         date: dateKeyToDb(learnedOn),
-        trackId: noteTags.includes("teaching") ? ctx.lecturer.id : ctx.swe.id,
+        trackId: noteTags.includes("ml") ? ctx.ds.id : ctx.swe.id,
         title,
         contentMd: content,
         confidence: ctx.between(2, 5),
@@ -354,14 +354,14 @@ async function seedPractice(prisma: PrismaClient, ctx: Ctx, today: string) {
     ["Tell me about a time you disagreed with a teammate.", false],
     ["How would you design a URL shortener?", false],
     ["Explain the event loop in Node.js.", false],
-    ["Why do you want to teach at this university?", true],
-    ["How do you assess whether students met the learning outcomes?", true],
+    ["How would you detect and handle data leakage in a model?", true],
+    ["Design an A/B test for a new checkout button.", true],
     ["What happens when you type a URL into the browser?", false],
   ];
   await prisma.practiceQuestion.createMany({
-    data: questions.map(([question, lecturer], n) => ({
+    data: questions.map(([question, ds], n) => ({
       userId: ctx.userId,
-      trackId: lecturer ? ctx.lecturer.id : ctx.swe.id,
+      trackId: ds ? ctx.ds.id : ctx.swe.id,
       question,
       answerMd: "Draft answer: structure it, give one concrete example, close with the result.",
       reviewStage: ctx.between(0, 3),
@@ -370,19 +370,19 @@ async function seedPractice(prisma: PrismaClient, ctx: Ctx, today: string) {
   });
 
   const talks = [
+    "Portfolio walkthrough: Expense Tracker",
     "Intro to Graph Algorithms",
-    "Teaching Demo: Recursion",
+    "Churn prediction model: results",
     "Database Normalization",
-    "Research talk: Code Review Practices",
-    "Teaching Demo: Big-O Notation",
-    "Operating Systems: Scheduling",
-    "Teaching Demo: Hash Tables",
-    "Intro to Networking",
+    "Tech talk: Code Review Practices",
+    "A/B test readout: onboarding flow",
+    "System design: URL shortener",
+    "Capstone demo: recommendation engine",
   ];
   await prisma.presentation.createMany({
     data: talks.map((title, n) => ({
       userId: ctx.userId,
-      trackId: ctx.lecturer.id,
+      trackId: n % 2 === 0 ? ctx.swe.id : ctx.ds.id,
       title,
       date: dateKeyToDb(shiftDateKey(today, -(talks.length - n) * 8)),
       durationMin: ctx.between(15, 30),
@@ -396,12 +396,12 @@ async function seedPractice(prisma: PrismaClient, ctx: Ctx, today: string) {
     ["SYSTEM_DESIGN", 3],
     ["BEHAVIORAL", 4],
     ["TECHNICAL", 4],
-    ["TEACHING_DEMO", 4],
+    ["SCREENING", 4],
   ];
   await prisma.mockInterview.createMany({
     data: mocks.map(([type, score], n) => ({
       userId: ctx.userId,
-      trackId: type === "TEACHING_DEMO" ? ctx.lecturer.id : ctx.swe.id,
+      trackId: type === "SCREENING" ? ctx.ds.id : ctx.swe.id,
       date: dateKeyToDb(shiftDateKey(today, -(mocks.length - n) * 10)),
       partner: ctx.pickOne(["Peer", "Mentor", "Study group"]),
       type,
@@ -415,22 +415,22 @@ const PIPELINE: ApplicationStatus[] = ["WISHLIST", "APPLIED", "OA", "INTERVIEWIN
 
 async function seedJobs(prisma: PrismaClient, ctx: Ctx, today: string) {
   // Fictional organizations only.
-  const apps: [string, "COMPANY" | "UNIVERSITY", string, ApplicationStatus, number][] = [
-    ["Northwind Labs", "COMPANY", "Software Engineer, Backend", "OFFER", 48],
-    ["Brightpath", "COMPANY", "Full-Stack Engineer", "INTERVIEWING", 30],
-    ["Lumen Analytics", "COMPANY", "Frontend Engineer", "INTERVIEWING", 21],
-    ["Cobalt Systems", "COMPANY", "Software Engineer II", "OA", 12],
-    ["Pixelforge", "COMPANY", "React Developer", "APPLIED", 6],
-    ["Riverstone Bank", "COMPANY", "Platform Engineer", "APPLIED", 3],
-    ["Orbital Health", "COMPANY", "Full-Stack Developer", "REJECTED", 40],
-    ["Quanta Software", "COMPANY", "Backend Engineer (Node.js)", "REJECTED", 35],
-    ["Eastbridge University", "UNIVERSITY", "Lecturer, Computer Science", "INTERVIEWING", 25],
-    ["Green Valley University", "UNIVERSITY", "Lecturer, CSE", "APPLIED", 9],
-    ["Harbor AI", "COMPANY", "Software Engineer", "WISHLIST", 0],
-    ["Summit Cloud", "COMPANY", "Site Reliability Engineer", "WISHLIST", 0],
+  const apps: [string, string, ApplicationStatus, number, "swe" | "ds"][] = [
+    ["Northwind Labs", "Software Engineer, Backend", "OFFER", 48, "swe"],
+    ["Brightpath", "Full-Stack Engineer", "INTERVIEWING", 30, "swe"],
+    ["Lumen Analytics", "Data Scientist", "INTERVIEWING", 21, "ds"],
+    ["Cobalt Systems", "Software Engineer II", "OA", 12, "swe"],
+    ["Pixelforge", "React Developer", "APPLIED", 6, "swe"],
+    ["Riverstone Bank", "Platform Engineer", "APPLIED", 3, "swe"],
+    ["Orbital Health", "Full-Stack Developer", "REJECTED", 40, "swe"],
+    ["Quanta Software", "Backend Engineer (Node.js)", "REJECTED", 35, "swe"],
+    ["Eastbridge Insights", "Machine Learning Engineer", "INTERVIEWING", 25, "ds"],
+    ["Green Valley Retail", "Data Analyst", "APPLIED", 9, "ds"],
+    ["Harbor AI", "Software Engineer", "WISHLIST", 0, "swe"],
+    ["Summit Cloud", "Site Reliability Engineer", "WISHLIST", 0, "swe"],
   ];
   const userId = ctx.userId;
-  for (const [name, type, role, status, appliedDaysAgo] of apps) {
+  for (const [name, role, status, appliedDaysAgo, track] of apps) {
     // Status history: walk the pipeline up to the current (or last reached) stage.
     const reached = status === "REJECTED" ? "INTERVIEWING" : status;
     const path = PIPELINE.slice(0, PIPELINE.indexOf(reached) + 1);
@@ -447,8 +447,8 @@ async function seedJobs(prisma: PrismaClient, ctx: Ctx, today: string) {
 
     // Interviews: past rounds with results, plus an upcoming one for open applications.
     const rounds: InterviewRound[] =
-      type === "UNIVERSITY"
-        ? ["WRITTEN", "TEACHING_DEMO", "VIVA"]
+      track === "ds"
+        ? ["SCREENING", "TECHNICAL", "BEHAVIORAL"]
         : ["OA", "TECHNICAL", "SYSTEM_DESIGN", "HR"];
     const count = { OFFER: 4, INTERVIEWING: 3, REJECTED: 2, OA: 1 }[status as string] ?? 0;
     const interviews = rounds.slice(0, count).map((round, r) => {
@@ -474,12 +474,12 @@ async function seedJobs(prisma: PrismaClient, ctx: Ctx, today: string) {
       data: {
         userId,
         name,
-        type,
+        type: "COMPANY",
         location: ctx.pickOne(["Dhaka", "Remote", "Singapore", "Berlin"]),
         applications: {
           create: {
             userId,
-            trackId: type === "UNIVERSITY" ? ctx.lecturer.id : ctx.swe.id,
+            trackId: track === "ds" ? ctx.ds.id : ctx.swe.id,
             role,
             source: ctx.pickOne(["LinkedIn", "Referral", "Company site", "Job board"]),
             status,
@@ -487,8 +487,7 @@ async function seedJobs(prisma: PrismaClient, ctx: Ctx, today: string) {
               status === "WISHLIST" ? null : dateKeyToDb(shiftDateKey(today, -appliedDaysAgo)),
             deadlineOn:
               status === "WISHLIST" ? dateKeyToDb(shiftDateKey(today, ctx.between(5, 20))) : null,
-            salaryRange:
-              type === "COMPANY" ? ctx.pickOne(["$60k–80k", "$70k–90k", "$80k–100k"]) : null,
+            salaryRange: ctx.pickOne(["$60k–80k", "$70k–90k", "$80k–100k"]),
             events: { create: events },
             interviews: { create: interviews },
           },
@@ -529,14 +528,14 @@ async function seedResources(prisma: PrismaClient, ctx: Ctx, today: string) {
       status: "IN_PROGRESS",
     },
     {
-      title: "Teaching at Its Best",
-      author: "Linda B. Nilson",
+      title: "Hands-On Machine Learning",
+      author: "Aurélien Géron",
       type: "BOOK",
       unitLabel: "chapters",
-      totalUnits: 24,
+      totalUnits: 19,
       completedUnits: 5,
       status: "IN_PROGRESS",
-      trackId: ctx.lecturer.id,
+      trackId: ctx.ds.id,
     },
     {
       title: "Database Internals",
@@ -657,9 +656,9 @@ async function seedProjects(prisma: PrismaClient, ctx: Ctx) {
       },
       {
         userId: ctx.userId,
-        name: "Course scheduler",
-        description: "Constraint-based timetable generator for a university department.",
-        stack: ["Python", "OR-Tools"],
+        name: "Churn predictor",
+        description: "Predicts subscription churn from usage data, with an explainability report.",
+        stack: ["Python", "scikit-learn", "pandas"],
         status: "PLANNING",
         sortOrder: 2,
       },

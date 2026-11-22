@@ -123,7 +123,7 @@ describe("learning entries", () => {
     const res = await createLearningEntry(
       user,
       entry({
-        trackId: ctx.track("University Lecturer").id,
+        trackId: ctx.track("Data Science / ML").id,
         topicId: ctx.topic("Dynamic Programming").id,
       }),
       NOW,

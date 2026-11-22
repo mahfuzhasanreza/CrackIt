@@ -13,7 +13,7 @@ test("dashboard shows today, weekly goals and the 7-day chart", async ({ page })
   }
   await expect(page.getByRole("img", { name: /^Today:/ })).toBeVisible();
   await expect(page.getByRole("meter", { name: "SWE / Full-Stack weekly goal" })).toBeVisible();
-  await expect(page.getByRole("meter", { name: "University Lecturer weekly goal" })).toBeVisible();
+  await expect(page.getByRole("meter", { name: "Data Science / ML weekly goal" })).toBeVisible();
 
   // Table view mirrors the chart (7 days + header).
   await page.getByText("Show as table").click();

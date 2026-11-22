@@ -65,7 +65,7 @@ which makes simple questions hard to answer:
 - _Which applications are waiting on me, and how is my funnel converting?_
 
 CrackIt puts all of it in one app. Each user defines their own **tracks** (for example
-_SWE / Full-Stack_ or _University Lecturer_, both available as optional templates), and every
+_SWE / Full-Stack_ or _Data Science / ML_, both available as optional templates), and every
 minute, note, problem and application can be tied back to them.
 
 ## Features

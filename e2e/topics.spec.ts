@@ -58,8 +58,8 @@ test("switch tracks", async ({ page }) => {
   await page.goto("/topics");
   await page
     .getByRole("navigation", { name: "Tracks" })
-    .getByRole("link", { name: /University Lecturer/ })
+    .getByRole("link", { name: /Data Science \/ ML/ })
     .click();
-  await expect(page.getByRole("heading", { name: "University Lecturer" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "Actions for Teaching Demo" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Data Science / ML" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Actions for Machine Learning" })).toBeVisible();
 });

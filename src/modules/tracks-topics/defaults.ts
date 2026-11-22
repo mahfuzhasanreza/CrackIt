@@ -88,31 +88,31 @@ export const DEFAULT_TRACKS: DefaultTrack[] = [
     ],
   },
   {
-    name: "University Lecturer",
-    description: "Lecturer recruitment: subject depth, teaching demo, research, viva",
+    name: "Data Science / ML",
+    description: "Data scientist / ML engineer roles: statistics, ML, SQL, case studies",
     color: "#eb6834", // palette slot 2 (orange)
     weeklyTargetMinutes: 10 * 60,
     topics: [
       {
-        name: "Subject Knowledge",
-        children: leaves("Core CS Courses Revision", "Advanced Topics"),
+        name: "Statistics & Probability",
+        children: leaves("Distributions", "Hypothesis Testing", "A/B Testing"),
       },
       {
-        name: "Teaching Demo",
-        children: leaves("Lesson Planning", "Slide Preparation", "Mock Demo Practice"),
+        name: "Machine Learning",
+        children: leaves("Supervised Learning", "Model Evaluation", "Feature Engineering"),
       },
       {
-        name: "Research & Publications",
-        children: leaves("Thesis Summary", "Paper Writing", "Research Proposal"),
+        name: "Deep Learning",
+        children: leaves("Neural Network Basics", "CNNs & Transformers"),
       },
       {
-        name: "Viva / Board Questions",
-        children: leaves("Teaching Philosophy", "Subject Questions", "General & Current Affairs"),
+        name: "SQL & Data Wrangling",
+        children: leaves("Window Functions", "Pandas", "Data Cleaning"),
       },
-      { name: "Written Test Preparation" },
+      { name: "ML System Design" },
       {
-        name: "Application Documents",
-        children: leaves("Academic CV", "Teaching Statement", "Research Statement"),
+        name: "Case Studies & Product Sense",
+        children: leaves("Metrics Design", "Business Case Questions"),
       },
     ],
   },

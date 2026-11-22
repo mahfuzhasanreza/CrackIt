@@ -2,7 +2,7 @@
  * Create a login account from the command line (people can also sign up at /register).
  *   pnpm user:create --email you@example.com [--name "Your Name"] [--timezone Asia/Dhaka]
  *                    [--starter-tracks]
- * --starter-tracks also adds the SWE / Full-Stack and University Lecturer tracks with their
+ * --starter-tracks also adds the SWE / Full-Stack and Data Science / ML tracks with their
  * topic roadmaps; without it the account starts with no tracks, like a sign-up.
  * Password is prompted (hidden) or read from CRACKIT_PASSWORD.
  */

@@ -236,7 +236,7 @@ export function ApplicationForm({
           required
           maxLength={200}
           defaultValue={application?.role ?? ""}
-          placeholder="e.g. Software Engineer II / Lecturer, CSE"
+          placeholder="e.g. Software Engineer II / Data Scientist"
           aria-invalid={Boolean(err?.role)}
         />
       </Field>

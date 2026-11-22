@@ -31,7 +31,7 @@ export function GuestLoginButton() {
         {pending ? "Setting up a demo account…" : "Continue as guest"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">
-        No sign-up: explore with demo data. Guest accounts are deleted after 24 hours.
+        Guest accounts are deleted after 24 hours.
       </p>
     </form>
   );

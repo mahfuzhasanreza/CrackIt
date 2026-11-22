@@ -3,7 +3,7 @@
 # CrackIt — conventions for Claude Code
 
 Interview-prep tracker for any target (each user defines their own tracks; SWE / Full-Stack and
-University Lecturer are optional templates). The full product and
+Data Science / ML are optional templates). The full product and
 architecture plan is in `PLAN.md`; implement it phase by phase (section 11).
 
 ## Stack
